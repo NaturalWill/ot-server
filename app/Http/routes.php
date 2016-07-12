@@ -12,9 +12,30 @@
 */
 
 Route::get('/', function () {
+    	//return  str_random(60);
     return view('welcome');
 });
 
-Route::auth();
+//Route::auth();
 
-Route::get('/home', 'HomeController@index');
+//Route::get('/home', 'HomeController@index');
+
+Route::group(['prefix' => 'api/v1'], function () {
+	Route::post('login', 'Auth\AuthController@apilogin');
+	Route::post('register', 'Auth\AuthController@apiregister');
+	Route::group(['middleware' => 'authapi.deny'], function () {
+		Route::get('t', function () {
+			//return  str_random(60);
+			return oapi_response('welcome');
+		});
+		
+	});
+	Route::group(['middleware' => 'authapi.info'], function () {
+		Route::get('te', function () {
+			//return  str_random(60);
+			return oapi_response('welcome');
+		});
+		
+	});
+	
+});
