@@ -23,18 +23,9 @@ Route::get('/', function () {
 Route::group(['prefix' => 'api/v1'], function () {
 	Route::post('login', 'Auth\AuthController@apilogin');
 	Route::post('register', 'Auth\AuthController@apiregister');
-	Route::group(['middleware' => 'authapi.deny'], function () {
-		Route::get('t', function () {
-			//return  str_random(60);
-			return oapi_response('welcome');
-		});
-		
-	});
-	Route::group(['middleware' => 'authapi.info'], function () {
-		Route::get('te', function () {
-			//return  str_random(60);
-			return oapi_response('welcome');
-		});
+	Route::group(['middleware' => 'auth:api'], function () {
+		Route::get('user/profile', 'User\ProfileController@index');
+		Route::post('user/profile', 'User\ProfileController@store');
 		
 	});
 	

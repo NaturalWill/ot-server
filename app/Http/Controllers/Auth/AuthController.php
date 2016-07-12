@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
 use Illuminate\Support\Facades\Auth ;
+use App\Model\UserProfile;
 
 class AuthController extends Controller
 {
@@ -69,13 +70,19 @@ class AuthController extends Controller
     protected function create(array $data)
     {
     	$str=str_random(60);
-        return User::create([
-        	'name' => empty($data['name'])?'user_'.str_random():$data['name'],
+        $user = User::create([
         	'mobile' => $data['mobile'],
         	'email' => empty($data['email'])?null:$data['email'],
         	'password' => bcrypt($data['password']),
         	'api_token' => $str,
         ]);
+        
+
+        UserProfile::Create(['user_id' => $user->id,
+        		//'name' => empty($data['name'])?'user_'.str_random(4).time():$data['name'],
+        		'nickname' => empty($data['nickname'])?'user_'.str_random():$data['nickname']        		
+        ]);
+        return $user;
     }
     
 

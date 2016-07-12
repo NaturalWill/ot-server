@@ -23,4 +23,10 @@ class User extends Authenticatable
     protected $hidden = [
         'mobile', 'password', 'api_token', 'remember_token',
     ];
+    
+    public function profile()
+    {
+    	return $this->hasOne('App\Model\UserProfile');
+    }
+    
 }
