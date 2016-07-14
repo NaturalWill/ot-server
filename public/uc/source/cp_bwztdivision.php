@@ -1,7 +1,7 @@
 <?php
 /*
 	[UCenter Home] (C) 2007-2008 Comsenz Inc.
-	$Id: cp_class.php 7690 2008-06-18 06:18:39Z liguode $
+	$Id: cp_bwztdivision.php 7690 2008-06-18 06:18:39Z liguode $
 */
 
 if(!defined('IN_UCHOME')) {
@@ -9,25 +9,25 @@ if(!defined('IN_UCHOME')) {
 }
 
 //检查信息
-$classid = empty($_GET['classid'])?0:intval($_GET['classid']);
+$bwztdivisionid = empty($_GET['bwztdivisionid'])?0:intval($_GET['bwztdivisionid']);
 $op = empty($_GET['op'])?'':$_GET['op'];
 
-$class = array();
-if($classid) {
-	$query = $_SGLOBAL['db']->query("SELECT * FROM ".tname('class')." WHERE classid='$classid' AND uid='$_SGLOBAL[supe_uid]'");
-	$class = $_SGLOBAL['db']->fetch_array($query);
+$bwztdivision = array();
+if($bwztdivisionid) {
+	$query = $_SGLOBAL['db']->query("SELECT * FROM ".tname('bwztdivision')." WHERE bwztdivisionid='$bwztdivisionid' AND uid='$_SGLOBAL[supe_uid]'");
+	$bwztdivision = $_SGLOBAL['db']->fetch_array($query);
 }
-if(empty($class)) showmessage('did_not_specify_the_type_of_operation');
+if(empty($bwztdivision)) showmessage('did_not_specify_the_type_of_operation');
 
 if ($op == 'edit') {
 	
 	if(submitcheck('editsubmit')) {
 		
-		$_POST['classname'] = getstr($_POST['classname'], 40, 1, 1, 1);
-		if(strlen($_POST['classname']) < 1) {
-			showmessage('enter_the_correct_class_name');
+		$_POST['bwztdivisionname'] = getstr($_POST['bwztdivisionname'], 40, 1, 1, 1);
+		if(strlen($_POST['bwztdivisionname']) < 1) {
+			showmessage('enter_the_correct_bwztdivision_name');
 		}
-		updatetable('class', array('classname'=>$_POST['classname']), array('classid'=>$classid));
+		updatetable('bwztdivision', array('bwztdivisionname'=>$_POST['bwztdivisionname']), array('bwztdivisionid'=>$bwztdivisionid));
 		showmessage('do_success', $_POST['refer'], 0);
 	}
 
@@ -35,14 +35,14 @@ if ($op == 'edit') {
 	//删除分类
 	if(submitcheck('deletesubmit')) {
 		//更新日志分类
-		updatetable('blog', array('classid'=>0), array('classid'=>$classid));
-		$_SGLOBAL['db']->query("DELETE FROM ".tname('class')." WHERE classid='$classid'");
+		updatetable('bwzt', array('bwztdivisionid'=>0), array('bwztdivisionid'=>$bwztdivisionid));
+		$_SGLOBAL['db']->query("DELETE FROM ".tname('bwztdivision')." WHERE bwztdivisionid='$bwztdivisionid'");
 		
 		showmessage('do_success', $_POST['refer'], 0);
 	}
 }
 
 //模版
-include_once template("cp_class");
+include_once template("cp_bwztdivision");
 	
 ?>

@@ -37,7 +37,7 @@ if(submitcheck('networksubmit')) {
 		$_POST['network'][$type] = $values;
 	}
 	
-	data_set('network', $_POST['network']);
+	uchome_data_set('network', $_POST['network']);
 	
 	//更新缓存
 	include_once(S_ROOT.'./source/function_cache.php');

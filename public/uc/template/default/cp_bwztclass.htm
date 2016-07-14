@@ -2,13 +2,13 @@
 
 <!--{if $_GET['op'] == 'edit'}-->
 
-<h1>修改分类</h1>
+<h1>修改症状</h1>
 <a href="javascript:hideMenu();" class="float_del" title="关闭">关闭</a>
-<div class="popupmenu_inner" id="$classid">
-<form id="classform" name="classform" method="post" action="cp.php?ac=class&op=edit&classid=$classid">
+<div class="popupmenu_inner" id="$bwztclassid">
+<form id="classform" name="classform" method="post" action="cp.php?ac=bwztclass&op=edit&bwztclassid=$bwztclassid">
 	<p>
-		<label for="classname">新分类名：</label>
-		<input type="text" id="classname" name="classname" value="$class[classname]" size="10"></td>
+		<label for="bwztclassname">新症状名：</label>
+		<input type="text" id="bwztclassname" name="bwztclassname" value="$bwztclass[bwztclassname]" size="10"></td>
 	</p>
 	<p class="btn_line">
 		<input type="hidden" name="refer" value="$_SGLOBAL[refer]" />
@@ -25,11 +25,11 @@
 
 <!--{elseif $_GET['op'] == 'delete'}-->
 
-<h1>删除分类</h1>
+<h1>删除症状</h1>
 <a href="javascript:hideMenu();" class="float_del" title="关闭">关闭</a>
-<div class="popupmenu_inner" id="$classid">
-	<form id="classform" name="classform" method="post" action="cp.php?ac=class&op=delete&classid=$classid">
-	<p>确定删除指定的分类吗？</p>
+<div class="popupmenu_inner" id="$bwztclassid">
+	<form id="classform" name="classform" method="post" action="cp.php?ac=bwztclass&op=delete&bwztclassid=$bwztclassid">
+	<p>确定删除指定的症状吗？</p>
 	<p class="btn_line">
 		<input type="hidden" name="refer" value="$_SGLOBAL[refer]" />
 		<!--{if $_SGLOBAL[inajax]}-->

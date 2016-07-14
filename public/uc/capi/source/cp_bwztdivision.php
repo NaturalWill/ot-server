@@ -1,7 +1,7 @@
 <?php
 /*
 	[UCenter Home] (C) 2007-2008 Comsenz Inc.
-	$Id: cp_class.php 7690 2008-06-18 06:18:39Z liguode $
+	$Id: cp_bwztdivision.php 7690 2008-06-18 06:18:39Z liguode $
 */
 
 if(!defined('IN_UCHOME')) {
@@ -9,40 +9,68 @@ if(!defined('IN_UCHOME')) {
 }
 
 //检查信息
-$classid = empty($_GET['classid'])?0:intval($_GET['classid']);
+$bwztdivisionid = empty($_GET['bwztdivisionid'])?0:intval($_GET['bwztdivisionid']);
 $op = empty($_GET['op'])?'':$_GET['op'];
 
-$class = array();
-if($classid) {
-	$query = $_SGLOBAL['db']->query("SELECT * FROM ".tname('class')." WHERE classid='$classid' AND uid='$_SGLOBAL[supe_uid]'");
-	$class = $_SGLOBAL['db']->fetch_array($query);
+if ($op == 'add') {
+	//增加症状分类
+	if(!empty($_GET['bwztdivisionname'])) {
+		//分类名
+		$bwztdivisionname = shtmlspecialchars(trim($_GET['bwztdivisionname']));
+		$bwztdivisionname = getstr($bwztdivisionname, 0, 1, 1, 1);
+		if(empty($bwztdivisionname)) {
+			$bwztdivisionid = 0;
+		} else {
+			$bwztdivisionid = getcount('bwztdivision', array('bwztdivisionname'=>$bwztdivisionname, 'uid'=>$_SGLOBAL['supe_uid']), 'bwztdivisionid');
+			if(empty($bwztdivisionid)) {
+				$setarr = array(
+					'bwztdivisionname' => $bwztdivisionname,
+					'uid' => $_SGLOBAL['supe_uid'],
+					'dateline' => $_SGLOBAL['timestamp']
+				);
+				$bwztdivisionid = inserttable('bwztdivision', $setarr, 1);
+			}
+		}
+	}
 }
-if(empty($class)) showmessage('did_not_specify_the_type_of_operation');
+
+$bwztdivision = array();
+if($bwztdivisionid) {
+	$query = $_SGLOBAL['db']->query("SELECT * FROM ".tname('bwztdivision')." WHERE bwztdivisionid='$bwztdivisionid' AND uid='$_SGLOBAL[supe_uid]'");
+	$bwztdivision = $_SGLOBAL['db']->fetch_array($query);
+}
+if(empty($bwztdivision)) //showmessage('did_not_specify_the_type_of_operation');
+	capi_showmessage_by_data('did_not_specify_the_type_of_operation');
 
 if ($op == 'edit') {
 	
-	if(submitcheck('editsubmit')) {
+	if(capi_submitcheck('editsubmit')) {
 		
-		$_POST['classname'] = getstr($_POST['classname'], 40, 1, 1, 1);
-		if(strlen($_POST['classname']) < 1) {
-			showmessage('enter_the_correct_class_name');
+		$_GET['bwztdivisionname'] = getstr($_GET['bwztdivisionname'], 40, 1, 1, 1);
+		if(strlen($_GET['bwztdivisionname']) < 1) {
+			capi_showmessage_by_data('enter_the_correct_bwztdivision_name');
 		}
-		updatetable('class', array('classname'=>$_POST['classname']), array('classid'=>$classid));
-		showmessage('do_success', $_POST['refer'], 0);
+		updatetable('bwztdivision', array('bwztdivisionname'=>$_GET['bwztdivisionname']), array('bwztdivisionid'=>$bwztdivisionid));
+		//showmessage('do_success', $_POST['refer'], 0);
+		capi_showmessage_by_data('do_success',0);
 	}
 
 } elseif ($op == 'delete') {
 	//删除分类
-	if(submitcheck('deletesubmit')) {
+	if(capi_submitcheck('deletesubmit')) {
 		//更新日志分类
-		updatetable('blog', array('classid'=>0), array('classid'=>$classid));
-		$_SGLOBAL['db']->query("DELETE FROM ".tname('class')." WHERE classid='$classid'");
+		updatetable('bwzt', array('bwztdivisionid'=>0), array('bwztdivisionid'=>$bwztdivisionid));
+		$_SGLOBAL['db']->query("DELETE FROM ".tname('bwztdivision')." WHERE bwztdivisionid='$bwztdivisionid'");
 		
-		showmessage('do_success', $_POST['refer'], 0);
+		//showmessage('do_success', $_POST['refer'], 0);
+		capi_showmessage_by_data('do_success',0);
 	}
 }
 
 //模版
-include_once template("cp_class");
-	
+//include_once template("cp_bwztdivision");
+
+//查看当前分类信息
+capi_showmessage_by_data('do_success', 0, array("bwztdivision"=>$bwztdivision));
+
 ?>

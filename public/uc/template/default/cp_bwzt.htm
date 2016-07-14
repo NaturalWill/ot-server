@@ -2,11 +2,11 @@
 
 <!--{if $_GET[op] == 'delete'}-->
 
-<h1>删除日志</h1>
+<h1>删除咨询</h1>
 <a href="javascript:hideMenu();" class="float_del" title="关闭">关闭</a>
 <div class="popupmenu_inner">
-<form method="post" action="cp.php?ac=blog&op=delete&blogid=$blogid">
-	<p>确定删除指定的日志吗？</p>
+<form method="post" action="cp.php?ac=bwzt&op=delete&bwztid=$bwztid">
+	<p>确定删除指定的咨询吗？</p>
 	<p class="btn_line">
 		<input type="hidden" name="refer" value="$_SGLOBAL[refer]" />
 		<input type="hidden" name="deletesubmit" value="true" />
@@ -21,9 +21,9 @@
 <h1>调整热度</h1>
 <a href="javascript:hideMenu();" class="float_del" title="关闭">关闭</a>
 <div class="popupmenu_inner">
-<form method="post" action="cp.php?ac=blog&op=edithot&blogid=$blogid">
+<form method="post" action="cp.php?ac=bwzt&op=edithot&bwztid=$bwztid">
 	<p class="btn_line">
-		新的热度：<input type="text" name="hot" value="$blog[hot]" size="5"> 
+		新的热度：<input type="text" name="hot" value="$bwzt[hot]" size="5"> 
 		<input type="hidden" name="refer" value="$_SGLOBAL[refer]" />
 		<input type="hidden" name="hotsubmit" value="true" />
 		<input type="submit" name="btnsubmit" value="确定" class="submit" />
@@ -35,20 +35,20 @@
 <!--{else}-->
 
 <script language="javascript" src="image/editor/editor_function.js"></script>
-<script language="javascript" src="source/script_blog.js"></script>
+<script language="javascript" src="source/script_bwzt.js"></script>
 
 <!--{if $topic}-->
 	<!--{template cp_topic_menu}-->
 <!--{else}-->
-	<h2 class="title"><img src="image/app/blog.gif" />日志</h2>
+	<h2 class="title"><img src="image/app/bwzt.gif" />咨询</h2>
 	<div class="tabs_header">
 		<ul class="tabs">
-			<!--{if $blog[blogid]}-->
-			<li class="active"><a href="cp.php?ac=blog&blogid=$blog[blogid]"><span>编辑日志</span></a></li>
+			<!--{if $bwzt[bwztid]}-->
+			<li class="active"><a href="cp.php?ac=bwzt&bwztid=$bwzt[bwztid]"><span>编辑咨询</span></a></li>
 			<!--{/if}-->
-			<li<!--{if empty($blog[blogid])}--> class="active"<!--{/if}-->><a href="cp.php?ac=blog"><span>发表新日志</span></a></li>
-			<li><a href="cp.php?ac=import"><span>日志导入</span></a></li>
-			<li><a href="space.php?uid=$space[uid]&do=blog&view=me"><span>返回我的日志</span></a></li>
+			<li<!--{if empty($bwzt[bwztid])}--> class="active"<!--{/if}-->><a href="cp.php?ac=bwzt"><span>发表新咨询</span></a></li>
+			<li><a href="cp.php?ac=import"><span>咨询导入</span></a></li>
+			<li><a href="space.php?uid=$space[uid]&do=bwzt&view=me"><span>返回我的咨询</span></a></li>
 		</ul>
 	</div>
 <!--{/if}-->
@@ -60,28 +60,58 @@
 	</style>
 
 
-	<form method="post" action="cp.php?ac=blog&blogid=$blog[blogid]" enctype="multipart/form-data">
+	<form method="post" action="cp.php?ac=bwzt&bwztid=$bwzt[bwztid]" enctype="multipart/form-data">
 		<table cellspacing="4" cellpadding="4" width="100%" class="infotable">
 			<tr>
 				<td>
-					<select name="classid" id="classid" onchange="addSort(this)">
-						<option value="0">选择分类</option>
-						<!--{loop $classarr $value}-->
-						<!--{if $value['classid'] == $blog['classid']}-->
-						<option value="$value[classid]" selected>$value[classname]</option>
+					<select name="bwztclassid" id="bwztclassid" onchange="addSort(this)">
+						<option value="0">选择症状</option>
+						<!--{loop $bwztclassarr $value}-->
+						<!--{if $value['bwztclassid'] == $bwzt['bwztclassid']}-->
+						<option value="$value[bwztclassid]" selected>$value[bwztclassname]</option>
 						<!--{else}-->
-						<option value="$value[classid]">$value[classname]</option>
+						<option value="$value[bwztclassid]">$value[bwztclassname]</option>
 						<!--{/if}-->
 						<!--{/loop}-->
-						<!--{if !$blog['uid'] || $blog['uid']==$_SGLOBAL['supe_uid']}--><option value="addoption" style="color:red;">+新建分类</option><!--{/if}-->
+						<!--{if !$bwzt['uid'] || $bwzt['uid']==$_SGLOBAL['supe_uid']}--><option value="addoption" style="color:red;">+新建症状</option><!--{/if}-->
+					<input type="text" class="t_input" id="subject" name="subject" value="$bwzt[subject]" size="60" onblur="relatekw();" />
 					</select>
-					<input type="text" class="t_input" id="subject" name="subject" value="$blog[subject]" size="60" onblur="relatekw();" />
 				</td>
 			</tr>
 			<tr>
 				<td>
-				<a id="doodleBox" href="magic.php?mid=doodle&showid=blog_doodle&target=uchome-ttHtmlEditor&from=editor" style="display:none"></a>
-				<textarea class="userData" name="message" id="uchome-ttHtmlEditor" style="height:100%;width:100%;display:none;border:0px">$blog[message]</textarea>
+					<select name="bwztdivisionid" id="bwztdivisionid" onchange="addSort(this)">
+						<option value="0">选择科室</option>
+						<!--{loop $bwztdivisionarr $value}-->
+						<!--{if $value['bwztdivisionid'] == $bwzt['bwztdivisionid']}-->
+						<option value="$value[bwztdivisionid]" selected>$value[bwztdivisionname]</option>
+						<!--{else}-->
+						<option value="$value[bwztdivisionid]">$value[bwztdivisionname]</option>
+						<!--{/if}-->
+						<!--{/loop}-->
+						<!--{if !$bwzt['uid'] || $bwzt['uid']==$_SGLOBAL['supe_uid']}--><option value="addoption" style="color:red;">+新建科室</option><!--{/if}-->
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>性别：
+      <!-- <fieldset data-role="controlgroup"> -->
+        <label for="male">男</label>
+        <input type="radio" name="sex" id="male" value="男" />
+        <label for="female">女</label>
+        <input type="radio" name="sex" id="female" value="女" checked="true" />	
+      <!-- </fieldset> -->
+				</td>
+			</tr>
+			<tr>
+				<td>年龄：<input type="text" class="t_input" id="age" name="age" value="$bwzt[age]"  />
+				
+				</td>
+			</tr>
+			<tr>
+				<td>
+				<a id="doodleBox" href="magic.php?mid=doodle&showid=bwzt_doodle&target=uchome-ttHtmlEditor&from=editor" style="display:none"></a>
+				<textarea class="userData" name="message" id="uchome-ttHtmlEditor" style="height:100%;width:100%;display:none;border:0px">$bwzt[message]</textarea>
 				<iframe src="editor.php?charset=$_SC[charset]&allowhtml=$allowhtml&doodle=<!--{if isset($_SGLOBAL[magic][doodle])}-->1<!--{/if}-->" name="uchome-ifrHtmlEditor" id="uchome-ifrHtmlEditor" scrolling="no" border="0" frameborder="0" style="width:100%;border: 1px solid #C5C5C5;" height="400"></iframe>
 				</td>
 			</tr>
@@ -89,10 +119,10 @@
 		<table cellspacing="4" cellpadding="4" width="100%" class="infotable">
 			<tr>
 				<th width="100">标签</th>
-				<td><input type="text" class="t_input" size="40" id="tag" name="tag" value="$blog[tag]"> <input type="button" name="clickbutton[]" value="自动获取" class="button" onclick="relatekw();"></td>
+				<td><input type="text" class="t_input" size="40" id="tag" name="tag" value="$bwzt[tag]"> <input type="button" name="clickbutton[]" value="自动获取" class="button" onclick="relatekw();"></td>
 			</tr>
 			
-			<!--{if $blog['uid'] && $blog['uid']!=$_SGLOBAL['supe_uid']}-->
+			<!--{if $bwzt['uid'] && $bwzt['uid']!=$_SGLOBAL['supe_uid']}-->
 			<!--{eval $selectgroupstyle='display:none';}-->
 			<tbody style="display:none;">
 			<!--{/if}-->
@@ -106,11 +136,11 @@
 						<option value="3"$friendarr[3]>仅自己可见</option>
 						<option value="4"$friendarr[4]>凭密码查看</option>
 					</select>
-					<span id="span_password" style="$passwordstyle">密码:<input type="text" name="password" value="$blog[password]" size="10" onkeyup="value=value.replace(/[^\w\.\/]/ig,'')"></span>
-					<input type="checkbox" name="noreply" value="1"<!--{if $blog[noreply]}--> checked<!--{/if}-->> 不允许评论
+					<span id="span_password" style="$passwordstyle">密码:<input type="text" name="password" value="$bwzt[password]" size="10" onkeyup="value=value.replace(/[^\w\.\/]/ig,'')"></span>
+					<input type="checkbox" name="noreply" value="1"<!--{if $bwzt[noreply]}--> checked<!--{/if}-->> 不允许评论
 				</td>
 			</tr>
-			<!--{if $blog['uid'] && $blog['uid']!=$_SGLOBAL['supe_uid']}--></tbody><!--{/if}-->
+			<!--{if $bwzt['uid'] && $bwzt['uid']!=$_SGLOBAL['supe_uid']}--></tbody><!--{/if}-->
 			<tbody id="tb_selectgroup" style="$selectgroupstyle">
 			<tr>
 				<th>指定好友</th>
@@ -124,17 +154,17 @@
 			<tr>
 				<th>&nbsp;</th>
 				<td>
-				<textarea name="target_names" id="target_names" style="width:85%;" rows="3">$blog[target_names]</textarea>
+				<textarea name="target_names" id="target_names" style="width:85%;" rows="3">$bwzt[target_names]</textarea>
 				<br>(可以填写多个好友名，请用空格进行分割)</td>
 			</tr>
 			</tbody>
 			
 			
-			<!--{if checkperm('manageblog')}-->
+			<!--{if checkperm('managebwzt')}-->
 			<tr>
 				<th width="100">热度</th>
 				<td>
-					<input type="text" class="t_input" name="hot" id="hot" value="$blog[hot]" size="5">
+					<input type="text" class="t_input" name="hot" id="hot" value="$bwzt[hot]" size="5">
 				</td>
 			</tr>
 			<!--{/if}-->
@@ -163,17 +193,17 @@
 			<tr>
 				<th width="100">动态选项</th>
 				<td>
-					<input type="checkbox" name="makefeed" id="makefeed" value="1"<!--{if ckprivacy('blog', 1)}--> checked<!--{/if}-->> 产生动态 (<a href="cp.php?ac=privacy#feed" target="_blank">更改默认设置</a>)
+					<input type="checkbox" name="makefeed" id="makefeed" value="1"<!--{if ckprivacy('bwzt', 1)}--> checked<!--{/if}-->> 产生动态 (<a href="cp.php?ac=privacy#feed" target="_blank">更改默认设置</a>)
 				</td>
 			</tr>			
 		</table>
-		<input type="hidden" name="blogsubmit" value="true" />
-		<input type="button" id="blogbutton" name="blogbutton" value="提交发布" onclick="validate(this);" style="display: none;" />
+		<input type="hidden" name="bwztsubmit" value="true" />
+		<input type="button" id="bwztbutton" name="bwztbutton" value="提交发布" onclick="validate(this);" style="display: none;" />
 		<input type="hidden" name="topicid" value="$_GET[topicid]" />
 		<input type="hidden" name="formhash" value="<!--{eval echo formhash();}-->" />
 	</form>
 
-	<!--{if !$_SGLOBAL[inajax] && (!$blog['uid'] || $blog['uid']==$_SGLOBAL['supe_uid'])}-->
+	<!--{if !$_SGLOBAL[inajax] && (!$bwzt['uid'] || $bwzt['uid']==$_SGLOBAL['supe_uid'])}-->
 	<table cellspacing="4" cellpadding="4" width="100%" class="infotable">
 		<tr><th width="100">图片</th><td>
 		<input type="button" name="clickbutton[]" value="上传图片" class="button" onclick="edit_album_show('pic')">
@@ -242,7 +272,7 @@
 		<tr>
 			<th width="100">&nbsp;</th>
 			<td>
-			<input type="button" id="issuance" onclick="document.getElementById('blogbutton').click();" value="保存发布" class="submit" /></td>
+			<input type="button" id="issuance" onclick="document.getElementById('bwztbutton').click();" value="保存发布" class="submit" /></td>
 		</tr>
 	</table>
 </div>

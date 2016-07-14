@@ -11,7 +11,7 @@ if(!defined('IN_UCHOME')) {
 include_once(S_ROOT.'./source/function_bbcode.php');
 
 //共用变量
-$tospace = $pic = $blog = $album = $share = $event = $poll = array();
+$tospace = $pic = $blog  = $bwzt = $album = $share = $event = $poll = array();
 
 if(submitcheck('commentsubmit')) {
 
@@ -61,7 +61,7 @@ if(submitcheck('commentsubmit')) {
 			$comment['message'] = preg_replace("/\<div class=\"quote\"\>\<span class=\"q\"\>.*?\<\/span\>\<\/div\>/is", '', $comment['message']);
 			//bbcode转换
 			$comment['message'] = html2bbcode($comment['message']);
-			$message = addslashes("<div class=\"quote\"><span class=\"q\"><b>".$_SN[$comment['authorid']]."</b>: ".getstr($comment['message'], 150, 0, 0, 0, 2, 1).'</span></div>').$message;
+			//$message = addslashes("<div class=\"quote\"><span class=\"q\"><b>".$_SN[$comment['authorid']]."</b>: ".getstr($comment['message'], 150, 0, 0, 0, 2, 1).'</span></div>').$message;
 			if($comment['idtype']=='uid') {
 				$id = $comment['authorid'];
 			}
@@ -157,6 +157,45 @@ if(submitcheck('commentsubmit')) {
 			
 			$hotarr = array('blogid', $blog['blogid'], $blog['hotuser']);
 			$stattype = 'blogcomment';//统计
+			break;
+		case 'bwztid':
+			//读取咨询
+			$query = $_SGLOBAL['db']->query("SELECT b.*, bf.target_ids, bf.hotuser
+				FROM ".tname('bwzt')." b
+				LEFT JOIN ".tname('bwztfield')." bf ON bf.bwztid=b.bwztid
+				WHERE b.bwztid='$id'");
+			$bwzt = $_SGLOBAL['db']->fetch_array($query);
+			//咨询不存在
+			if(empty($bwzt)) {
+				showmessage('view_to_info_did_not_exist');
+			}
+			
+			//检索空间
+			$tospace = getspace($bwzt['uid']);
+			
+			//验证隐私
+			if(!ckfriend($bwzt['uid'], $bwzt['friend'], $bwzt['target_ids'])) {
+				//没有权限
+				showmessage('no_privilege');
+			} elseif(!$tospace['self'] && $bwzt['friend'] == 4) {
+				//密码输入问题
+				$cookiename = "view_pwd_bwzt_$bwzt[bwztid]";
+				$cookievalue = empty($_SCOOKIE[$cookiename])?'':$_SCOOKIE[$cookiename];
+				if($cookievalue != md5(md5($bwzt['password']))) {
+					showmessage('no_privilege');
+				}
+			}
+
+			//是否允许评论
+			if(!empty($bwzt['noreply'])) {
+				showmessage('do_not_accept_comments');
+			}
+			if($bwzt['target_ids']) {
+				$bwzt['target_ids'] .= ",$bwzt[uid]";
+			}
+			
+			$hotarr = array('bwztid', $bwzt['bwztid'], $bwzt['hotuser']);
+			$stattype = 'bwztcomment';//统计
 			break;
 		case 'sid':
 			//读取日志
@@ -292,6 +331,19 @@ if(submitcheck('commentsubmit')) {
 			$fs['target_ids'] = $blog['target_ids'];
 			$fs['friend'] = $blog['friend'];
 			break;
+		case 'bwztid':
+			//更新评论统计
+			$_SGLOBAL['db']->query("UPDATE ".tname('bwzt')." SET replynum=replynum+1 WHERE bwztid='$id'");
+			//事件
+			$fs['title_template'] = cplang('feed_comment_bwzt');
+			$fs['title_data'] = array('touser'=>"<a href=\"space.php?uid=$tospace[uid]\">".$_SN[$tospace['uid']]."</a>", 'bwzt'=>"<a href=\"space.php?uid=$tospace[uid]&do=bwzt&id=$id\">$bwzt[subject]</a>");
+			$fs['body_template'] = '';
+			$fs['body_data'] = array();
+			$fs['body_general'] = '';
+			$fs['target_ids'] = $bwzt['target_ids'];
+			$fs['friend'] = $bwzt['friend'];
+			break;
+			
 		case 'sid':
 			//事件
 			$fs['title_template'] = cplang('feed_comment_share');
@@ -322,6 +374,7 @@ if(submitcheck('commentsubmit')) {
 	}
 
 	$setarr = array(
+		'refercid' => $cid,
 		'uid' => $tospace['uid'],
 		'id' => $id,
 		'idtype' => $_POST['idtype'],
@@ -374,6 +427,17 @@ if(submitcheck('commentsubmit')) {
 			$magvalues = array();
 			$msgtype = 'blog_comment';
 			$q_msgtype = 'blog_comment_reply';
+			break;
+		case 'bwztid':
+			//通知
+			$n_url = "space.php?uid=$tospace[uid]&do=bwzt&id=$id&cid=$cid";
+			$note_type = 'bwztcomment';
+			$note = cplang('note_bwzt_comment', array($n_url, $bwzt['subject']));
+			$q_note = cplang('note_bwzt_comment_reply', array($n_url));
+			$msg = 'do_success';
+			$magvalues = array();
+			$msgtype = 'bwzt_comment';
+			$q_msgtype = 'bwzt_comment_reply';
 			break;
 		case 'sid':
 			//分享
@@ -461,6 +525,33 @@ if(submitcheck('commentsubmit')) {
 			}
 			getreward($becomment, 1, $tospace['uid'], $needle, 0);
 		}
+	}
+	
+	
+	if($bwzt){
+		$query = $_SGLOBAL['db']->query("SELECT distinct authorid FROM ".tname('comment')." WHERE id='{$bwzt['bwztid']}' AND idtype='bwztid' ORDER BY dateline ");
+		$uidarr=array();
+		while ($value = $_SGLOBAL['db']->fetch_array($query)) {
+			if($value['authorid']!=$space['uid'])
+				$uidarr[] = strval($value['authorid']);
+		}
+		if(!in_array($tospace['uid'], $uidarr)) $uidarr[] = strval($tospace['uid']);
+		
+		$tospace['name']=empty($tospace['name'])?$tospace['username']:$tospace['name'];
+		$space['name']=empty($space['name'])?$space['username']:$space['name'];
+		
+		$pushmessage=$space['name'].' 评论了 '.$bwzt['subject'].': '. $setarr['message'];
+		$extras=array(
+			"commentid"=>$cid,
+			'uid'=>$setarr['uid'],
+			'name'=>$tospace['name'],
+			'subject'=>$bwzt['subject'],
+			'id'=>$setarr['id'],
+			'idtype'=>$setarr['idtype']
+		);		
+		include_once(S_ROOT.'./source/function_jpush.php');
+		capi_jpush($uidarr, $pushmessage, null, $extras);
+
 	}
 
 	showmessage($msg, $_POST['refer'], 0, $magvalues);

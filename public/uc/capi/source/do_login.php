@@ -11,10 +11,24 @@ if(!defined('IN_UCHOME')) {
 include_once(S_ROOT.'./source/function_cp.php');
 
 if($_SGLOBAL['supe_uid']) {
-	showmessage('do_success', 'space.php', 0);
+	$query = $_SGLOBAL['db']->query("SELECT * FROM ".tname('session')." WHERE username='$_REQUEST[username]' ");
+	if($member = $_SGLOBAL['db']->fetch_array($query)) {
+		$auth = authcode("$member[password]\t$member[uid]", 'ENCODE');
+		$space = getspace($_SGLOBAL['supe_uid']);
+		
+		//性别
+		$space['sex_org'] = $space['sex'];
+		$space['sex'] = $space['sex']=='1'?lang('man'):($space['sex']=='2'?lang('woman'):'');
+		//年龄
+		$space['age'] = ($space['birthyear']&&$space['birthmonth']&&$space['birthday'])?intval((time() - strtotime($space['birthyear'].'/'.$space['birthmonth'].'/'.$space['birthday']))/365/24/3600):'';
+		//增加用户头像地址
+		$space['avatar_url'] =$space['avatar']? avatar($space['uid'],'middle',TRUE) : avatar_default();
+		capi_showmessage_by_data('do_success', 0, array("m_auth"=>rawurlencode($auth), 'uhash'=> $_SGLOBAL['uhash']/* 用于注销 */, "formhash"=>formhash(), "space"=>$space));
+	}
+	capi_showmessage_by_data('login_failure_please_re_login');
 }
 
-$refer = empty($_GET['refer'])?rawurldecode($_SCOOKIE['_refer']):$_GET['refer'];
+$refer = empty($_REQUEST['refer'])?rawurldecode($_SCOOKIE['_refer']):$_REQUEST['refer'];
 preg_match("/(admincp|do|cp)\.php\?ac\=([a-z]+)/i", $refer, $ms);
 if($ms) {
 	if($ms[1] != 'cp' || $ms[2] != 'sendmail') $refer = '';
@@ -24,10 +38,10 @@ if(empty($refer)) {
 }
 
 //好友邀请
-$uid = empty($_GET['uid'])?0:intval($_GET['uid']);
-$code = empty($_GET['code'])?'':$_GET['code'];
-$app = empty($_GET['app'])?'':intval($_GET['app']);
-$invite = empty($_GET['invite'])?'':$_GET['invite'];
+$uid = empty($_REQUEST['uid'])?0:intval($_REQUEST['uid']);
+$code = empty($_REQUEST['code'])?'':$_REQUEST['code'];
+$app = empty($_REQUEST['app'])?'':intval($_REQUEST['app']);
+$invite = empty($_REQUEST['invite'])?'':$_REQUEST['invite'];
 $invitearr = array();
 $reward = getreward('invitecode', 0);
 if($uid && $code && !$reward['credit']) {
@@ -46,22 +60,22 @@ if($uid && $code && !$reward['credit']) {
 //没有登录表单
 $_SGLOBAL['nologinform'] = 1;
 
-if(submitcheck('loginsubmit')) {
+if(capi_submitcheck('loginsubmit')) {
 
-	$password = $_POST['password'];
-	$username = trim($_POST['username']);
-	$cookietime = intval($_POST['cookietime']);
+	$password = $_REQUEST['password'];
+	$username = trim($_REQUEST['username']);
+	$cookietime = intval($_REQUEST['cookietime']);
 	
 	$cookiecheck = $cookietime?' checked':'';
 	$membername = $username;
 	
-	if(empty($_POST['username'])) {
-		showmessage('users_were_not_empty_please_re_login', 'do.php?ac='.$_SCONFIG['login_action']);
+	if(empty($_REQUEST['username'])) {
+		capi_showmessage_by_data('users_were_not_empty_please_re_login');
 	}
 	
 	if($_SCONFIG['seccode_login']) {
 		include_once(S_ROOT.'./source/function_cp.php');
-		if(!ckseccode($_POST['seccode'])) {
+		if(!ckseccode($_REQUEST['seccode'])) {
 			$_SGLOBAL['input_seccode'] = 1;
 			include template('do_login');
 			exit;
@@ -70,7 +84,7 @@ if(submitcheck('loginsubmit')) {
 
 	//同步获取用户源
 	if(!$passport = getpassport($username, $password)) {
-		showmessage('login_failure_please_re_login', 'do.php?ac='.$_SCONFIG['login_action']);
+		capi_showmessage_by_data('login_failure_please_re_login', 1, 'do.php?ac='.$_SCONFIG['login_action']);
 	}
 	
 	$setarr = array(
@@ -81,10 +95,16 @@ if(submitcheck('loginsubmit')) {
 	
 	include_once(S_ROOT.'./source/function_space.php');
 	//开通空间
-	$query = $_SGLOBAL['db']->query("SELECT * FROM ".tname('space')." WHERE uid='$setarr[uid]'");
+	$query = $_SGLOBAL['db']->query("SELECT s.*, sf.* FROM ".tname('space')." s LEFT JOIN ".tname('spacefield')." sf ON sf.uid=s.uid WHERE s.uid='$setarr[uid]'");
 	if(!$space = $_SGLOBAL['db']->fetch_array($query)) {
 		$space = space_open($setarr['uid'], $setarr['username'], 0, $passport['email']);
 	}
+	//性别
+	$space['sex_org'] = $space['sex'];
+	$space['sex'] = $space['sex']=='1'?lang('man'):($space['sex']=='2'?lang('woman'):'');
+	//年龄
+	$space['age'] = ($space['birthyear']&&$space['birthmonth']&&$space['birthday'])?intval((time() - strtotime($space['birthyear'].'/'.$space['birthmonth'].'/'.$space['birthday']))/365/24/3600):'';
+
 	
 	$_SGLOBAL['member'] = $space;
 	
@@ -102,9 +122,9 @@ if(submitcheck('loginsubmit')) {
 
 	//清理在线session
 	insertsession($setarr);
-	
+	$auth = authcode("$setarr[password]\t$setarr[uid]", 'ENCODE');
 	//设置cookie
-	ssetcookie('auth', authcode("$setarr[password]\t$setarr[uid]", 'ENCODE'), $cookietime);
+	ssetcookie('auth', $auth, $cookietime);
 	ssetcookie('loginuser', $passport['username'], 31536000);
 	ssetcookie('_refer', '');
 	
@@ -151,18 +171,26 @@ if(submitcheck('loginsubmit')) {
 		$_SGLOBAL['db']->query("UPDATE ".tname('space')." SET ".implode(',', $setarr)." WHERE uid='$space[uid]'");
 	}
 
-	if(empty($_POST['refer'])) {
-		$_POST['refer'] = 'space.php?do=home';
+	if(empty($_REQUEST['refer'])) {
+		$_REQUEST['refer'] = 'space.php?do=home';
 	}
 	
 	realname_get();
-	
-	showmessage('login_success', $app?"userapp.php?id=$app":$_POST['refer'], 1, array($ucsynlogin));
+
+	//增加用户头像地址
+	$space['avatar_url'] =$space['avatar']? avatar($space['uid'],'middle',TRUE):avatar_default();
+
+	//通知数
+	$space['allnotenum'] = 0;
+	foreach (array('notenum','pokenum','addfriendnum','mtaginvitenum','eventinvitenum','myinvitenum') as $value) {
+		$space['allnotenum'] = $space['allnotenum'] + $space[$value];
+	}
+	capi_showmessage_by_data('login_success',  0, array("m_auth"=>rawurlencode($auth), 'uhash'=> $_SGLOBAL['uhash']/* 用于注销 */, "formhash"=>formhash(), "space"=>$space));
 }
 
 $membername = empty($_SCOOKIE['loginuser'])?'':sstripslashes($_SCOOKIE['loginuser']);
 $cookiecheck = ' checked';
 
-include template('do_login');
+//include template('do_login');
 
 ?>

@@ -1,15 +1,15 @@
 <?php
 /*
 	[UCenter Home] (C) 2007-2008 Comsenz Inc.
-	$Id: function_blog.php 13245 2009-08-25 02:01:40Z liguode $
+	$Id: function_bwzt.php 13245 2009-08-25 02:01:40Z liguode $
 */
 
 if(!defined('IN_UCHOME')) {
 	exit('Access Denied');
 }
 
-//添加博客
-function blog_post($POST, $olds=array()) {
+//添加咨询
+function bwzt_post($POST, $olds=array()) {
 	global $_SGLOBAL, $_SC, $space;
 	
 	//操作者角色切换
@@ -25,6 +25,14 @@ function blog_post($POST, $olds=array()) {
 	$POST['subject'] = getstr(trim($POST['subject']), 80, 1, 1, 1);
 	if(strlen($POST['subject'])<1) $POST['subject'] = sgmdate('Y-m-d');
 	$POST['friend'] = intval($POST['friend']);
+	
+	//性别
+	$POST['sex'] = getstr(trim($POST['sex']), 80, 1, 1, 1);
+	if(strlen($POST['sex'])<1) $POST['sex'] = "女";
+	
+	//年龄
+	$POST['age'] = intval($POST['age']);
+	if($POST['age']<0) $POST['age'] = 0 ;
 	
 	//隐私
 	$POST['target_ids'] = '';
@@ -75,44 +83,73 @@ function blog_post($POST, $olds=array()) {
 	$message = $POST['message'];
 
 	//个人分类
-	if(empty($olds['classid']) || $POST['classid'] != $olds['classid']) {
-		if(!empty($POST['classid']) && substr($POST['classid'], 0, 4) == 'new:') {
+	if(empty($olds['bwztclassid']) || $POST['bwztclassid'] != $olds['bwztclassid']) {
+		if(!empty($POST['bwztclassid']) && substr($POST['bwztclassid'], 0, 4) == 'new:') {
 			//分类名
-			$classname = shtmlspecialchars(trim(substr($POST['classid'], 4)));
-			$classname = getstr($classname, 0, 1, 1, 1);
-			if(empty($classname)) {
-				$classid = 0;
+			$bwztclassname = shtmlspecialchars(trim(substr($POST['bwztclassid'], 4)));
+			$bwztclassname = getstr($bwztclassname, 0, 1, 1, 1);
+			if(empty($bwztclassname)) {
+				$bwztclassid = 0;
 			} else {
-				$classid = getcount('class', array('classname'=>$classname, 'uid'=>$_SGLOBAL['supe_uid']), 'classid');
-				if(empty($classid)) {
+				$bwztclassid = getcount('bwztclass', array('bwztclassname'=>$bwztclassname, 'uid'=>$_SGLOBAL['supe_uid']), 'bwztclassid');
+				if(empty($bwztclassid)) {
 					$setarr = array(
-						'classname' => $classname,
+						'bwztclassname' => $bwztclassname,
 						'uid' => $_SGLOBAL['supe_uid'],
 						'dateline' => $_SGLOBAL['timestamp']
 					);
-					$classid = inserttable('class', $setarr, 1);
+					$bwztclassid = inserttable('bwztclass', $setarr, 1);
 				}
 			}
 		} else {
-			$classid = intval($POST['classid']);
+			$bwztclassid = intval($POST['bwztclassid']);
 
 		}
 	} else {
-		$classid = $olds['classid'];
+		$bwztclassid = $olds['bwztclassid'];
 	}
-	if($classid && empty($classname)) {
-		//是否是自己的
-		$classname = getcount('class', array('classid'=>$classid, 'uid'=>$_SGLOBAL['supe_uid']), 'classname');
-		if(empty($classname)) $classid = 0;
+	
+
+	//new
+	//科室分类
+	//
+	if(empty($olds['bwztdivisionid']) || $POST['bwztdivisionid'] != $olds['bwztdivisionid']) {
+		if(!empty($POST['bwztdivisionid']) && substr($POST['bwztdivisionid'], 0, 4) == 'new:') {
+			//分类名
+			$bwztdivisionname = shtmlspecialchars(trim(substr($POST['bwztdivisionid'], 4)));
+			$bwztdivisionname = getstr($bwztdivisionname, 0, 1, 1, 1);
+			if(empty($bwztdivisionname)) {
+				$bwztdivisionid = 0;
+			} else {
+				$bwztdivisionid = getcount('bwztdivision', array('bwztdivisionname'=>$bwztdivisionname, 'uid'=>$_SGLOBAL['supe_uid']), 'bwztdivisionid');
+				if(empty($bwztdivisionid)) {
+					$setarr = array(
+						'bwztdivisionname' => $bwztdivisionname,
+						'uid' => $_SGLOBAL['supe_uid'],
+						'dateline' => $_SGLOBAL['timestamp']
+					);
+					$bwztdivisionid = inserttable('bwztdivision', $setarr, 1);
+				}
+			}
+		} else {
+			$bwztdivisionid = intval($POST['bwztdivisionid']);
+
+		}
+	} else {
+		$bwztdivisionid = $olds['bwztdivisionid'];
 	}
 	
 	//主表
-	$blogarr = array(
+	$bwztarr = array(
 		'subject' => $POST['subject'],
-		'classid' => $classid,
+		'bwztclassid' => $bwztclassid,
+		'bwztdivisionid' => $bwztdivisionid,
+		'sex' => $POST['sex'],
+		'age' => $POST['age'],
 		'friend' => $POST['friend'],
 		'password' => $POST['password'],
-		'noreply' => empty($_POST['noreply'])?0:1
+		'noreply' => empty($_POST['noreply'])?0:1//,
+		//'status' => empty($_POST['status'])?0:1
 	);
 
 	//标题图片
@@ -126,40 +163,24 @@ function blog_post($POST, $olds=array()) {
 		while ($value = $_SGLOBAL['db']->fetch_array($query)) {
 			if(empty($titlepic) && $value['thumb']) {
 				$titlepic = $value['filepath'].'.thumb.jpg';
-				$blogarr['picflag'] = $value['remote']?2:1;
+				$bwztarr['picflag'] = $value['remote']?2:1;
 			}
 			$uploads[$POST['picids'][$value['picid']]] = $value;
 		}
 		if(empty($titlepic) && $value) {
 			$titlepic = $value['filepath'];
-			$blogarr['picflag'] = $value['remote']?2:1;
+			$bwztarr['picflag'] = $value['remote']?2:1;
 		}
 	}
 	
-	//插入文章
+	//记录图片数组
 	if($uploads) {
-		preg_match_all("/\<img\s.*?\_uchome\_localimg\_([0-9]+).+?src\=\"(.+?)\"/i", $message, $mathes);
-		if(!empty($mathes[1])) {
-			$searchs = $idsearchs = array();
-			$replaces = array();
-			foreach ($mathes[1] as $key => $value) {
-				if(!empty($mathes[2][$key]) && !empty($uploads[$value])) {
-					$searchs[] = $mathes[2][$key];
-					$idsearchs[] = "_uchome_localimg_$value";
-					$replaces[] = pic_get($uploads[$value]['filepath'], $uploads[$value]['thumb'], $uploads[$value]['remote'], 0);
-					unset($uploads[$value]);
-				}
-			}
-			if($searchs) {
-				$message = str_replace($searchs, $replaces, $message);
-				$message = str_replace($idsearchs, 'uchomelocalimg[]', $message);
-			}
-		}
-		//未插入文章
+		$pics=array();
 		foreach ($uploads as $value) {
 			$picurl = pic_get($value['filepath'], $value['thumb'], $value['remote'], 0);
-			$message .= "<div class=\"uchome-message-pic\"><img src=\"$picurl\"><p>$value[title]</p></div>";
-		}
+			$pics[]=array('picurl' => $picurl, 'title' => $value['title']);
+		}	
+		$bwztarr['pics']=json_encode($pics);
 	}
 	
 	//没有填写任何东西
@@ -174,35 +195,35 @@ function blog_post($POST, $olds=array()) {
 	//从内容中读取图片
 	if(empty($titlepic)) {
 		$titlepic = getmessagepic($message);
-		$blogarr['picflag'] = 0;
+		$bwztarr['picflag'] = 0;
 	}
-	$blogarr['pic'] = $titlepic;
+	$bwztarr['pic'] = $titlepic;
 	
 	//热度
-	if(checkperm('manageblog')) {
-		$blogarr['hot'] = intval($POST['hot']);
+	if(checkperm('managebwzt')) {
+		$bwztarr['hot'] = intval($POST['hot']);
 	}
 	
-	if($olds['blogid']) {
+	if($olds['bwztid']) {
 		//更新
-		$blogid = $olds['blogid'];
-		updatetable('blog', $blogarr, array('blogid'=>$blogid));
+		$bwztid = $olds['bwztid'];
+		updatetable('bwzt', $bwztarr, array('bwztid'=>$bwztid));
 		
 		$fuids = array();
 		
-		$blogarr['uid'] = $olds['uid'];
-		$blogarr['username'] = $olds['username'];
+		$bwztarr['uid'] = $olds['uid'];
+		$bwztarr['username'] = $olds['username'];
 	} else {
 		//参与热闹
-		$blogarr['topicid'] = topic_check($POST['topicid'], 'blog');
+		$bwztarr['topicid'] = topic_check($POST['topicid'], 'bwzt');
 
-		$blogarr['uid'] = $_SGLOBAL['supe_uid'];
-		$blogarr['username'] = $_SGLOBAL['supe_username'];
-		$blogarr['dateline'] = empty($POST['dateline'])?$_SGLOBAL['timestamp']:$POST['dateline'];
-		$blogid = inserttable('blog', $blogarr, 1);
+		$bwztarr['uid'] = $_SGLOBAL['supe_uid'];
+		$bwztarr['username'] = $_SGLOBAL['supe_username'];
+		$bwztarr['dateline'] = empty($POST['dateline'])?$_SGLOBAL['timestamp']:$POST['dateline'];
+		$bwztid = inserttable('bwzt', $bwztarr, 1);
 	}
 	
-	$blogarr['blogid'] = $blogid;
+	$bwztarr['bwztid'] = $bwztid;
 	
 	//附表	
 	$fieldarr = array(
@@ -220,27 +241,27 @@ function blog_post($POST, $olds=array()) {
 		if(!empty($olds['tag'])) {
 			//先把以前的给清理掉
 			$oldtags = array();
-			$query = $_SGLOBAL['db']->query("SELECT tagid, blogid FROM ".tname('tagblog')." WHERE blogid='$blogid'");
+			$query = $_SGLOBAL['db']->query("SELECT tagid, bwztid FROM ".tname('tagbwzt')." WHERE bwztid='$bwztid'");
 			while ($value = $_SGLOBAL['db']->fetch_array($query)) {
 				$oldtags[] = $value['tagid'];
 			}
 			if($oldtags) {
-				$_SGLOBAL['db']->query("UPDATE ".tname('tag')." SET blognum=blognum-1 WHERE tagid IN (".simplode($oldtags).")");
-				$_SGLOBAL['db']->query("DELETE FROM ".tname('tagblog')." WHERE blogid='$blogid'");
+				$_SGLOBAL['db']->query("UPDATE ".tname('tag')." SET bwztnum=bwztnum-1 WHERE tagid IN (".simplode($oldtags).")");
+				$_SGLOBAL['db']->query("DELETE FROM ".tname('tagbwzt')." WHERE bwztid='$bwztid'");
 			}
 		}
-		$tagarr = tag_batch($blogid, $POST['tag']);
+		$tagarr = tag_batch($bwztid, $POST['tag']);
 		//更新附表中的tag
 		$fieldarr['tag'] = empty($tagarr)?'':addslashes(serialize($tagarr));
 	}
 
 	if($olds) {
 		//更新
-		updatetable('blogfield', $fieldarr, array('blogid'=>$blogid));
+		updatetable('bwztfield', $fieldarr, array('bwztid'=>$bwztid));
 	} else {
-		$fieldarr['blogid'] = $blogid;
-		$fieldarr['uid'] = $blogarr['uid'];
-		inserttable('blogfield', $fieldarr);
+		$fieldarr['bwztid'] = $bwztid;
+		$fieldarr['uid'] = $bwztarr['uid'];
+		inserttable('bwztfield', $fieldarr);
 	}
 
 	//空间更新
@@ -249,40 +270,97 @@ function blog_post($POST, $olds=array()) {
 			//空间更新
 			$_SGLOBAL['db']->query("UPDATE ".tname('space')." SET updatetime='$_SGLOBAL[timestamp]' WHERE uid='$_SGLOBAL[supe_uid]'");
 		} else {
-			if(empty($space['blognum'])) {
-				$space['blognum'] = getcount('blog', array('uid'=>$space['uid']));
-				$blognumsql = "blognum=".$space['blognum'];
+			if(empty($space['bwztnum'])) {
+				$space['bwztnum'] = getcount('bwzt', array('uid'=>$space['uid']));
+				$bwztnumsql = "bwztnum=".$space['bwztnum'];
 			} else {
-				$blognumsql = 'blognum=blognum+1';
+				$bwztnumsql = 'bwztnum=bwztnum+1';
 			}
 			//积分
-			$reward = getreward('publishblog', 0);
-			$_SGLOBAL['db']->query("UPDATE ".tname('space')." SET {$blognumsql}, lastpost='$_SGLOBAL[timestamp]', updatetime='$_SGLOBAL[timestamp]', credit=credit+$reward[credit], experience=experience+$reward[experience] WHERE uid='$_SGLOBAL[supe_uid]'");
+			$reward = getreward('publishbwzt', 0);
+			$_SGLOBAL['db']->query("UPDATE ".tname('space')." SET {$bwztnumsql}, lastpost='$_SGLOBAL[timestamp]', updatetime='$_SGLOBAL[timestamp]', credit=credit+$reward[credit], experience=experience+$reward[experience] WHERE uid='$_SGLOBAL[supe_uid]'");
 			
 			//统计
-			updatestat('blog');
+			updatestat('bwzt');
 		}
 	}
 	
 	//产生feed
 	if($POST['makefeed']) {
 		include_once(S_ROOT.'./source/function_feed.php');
-		feed_publish($blogid, 'blogid', $olds?0:1);
+		feed_publish($bwztid, 'bwztid', $olds?0:1);
 	}
 	
 	//热闹
-	if(empty($olds) && $blogarr['topicid']) {
-		topic_join($blogarr['topicid'], $_SGLOBAL['supe_uid'], $_SGLOBAL['supe_username']);
+	if(empty($olds) && $bwztarr['topicid']) {
+		topic_join($bwztarr['topicid'], $_SGLOBAL['supe_uid'], $_SGLOBAL['supe_username']);
 	}
 
 	//角色切换
 	if(!empty($__SGLOBAL)) $_SGLOBAL = $__SGLOBAL;
 
-	return $blogarr;
+	return $bwztarr;
+}
+
+//更改咨询状态
+function bwzt_alterstatus($status, $olds=array()) {
+	global $_SGLOBAL, $_SC, $space;
+	
+	//操作者角色切换
+	$isself = 1;
+	if(!empty($olds['uid']) && $olds['uid'] != $_SGLOBAL['supe_uid']) {
+		$isself = 0;
+		$__SGLOBAL = $_SGLOBAL;
+		$_SGLOBAL['supe_uid'] = $olds['uid'];
+		$_SGLOBAL['supe_username'] = addslashes($olds['username']);
+	}
+	
+	//主表
+	$bwztarr = array('status' => empty($status)?0:1);
+	
+	if($olds['bwztid']) {
+		//更新
+		$bwztid = $olds['bwztid'];
+		updatetable('bwzt', $bwztarr, array('bwztid'=>$bwztid));
+		
+		$fuids = array();
+		
+		$bwztarr['uid'] = $olds['uid'];
+		$bwztarr['username'] = $olds['username'];
+	}
+	
+	$bwztarr['bwztid'] = $bwztid;
+	
+
+	//空间更新
+	if($isself) {
+		if($olds) {
+			//空间更新
+			$_SGLOBAL['db']->query("UPDATE ".tname('space')." SET updatetime='$_SGLOBAL[timestamp]' WHERE uid='$_SGLOBAL[supe_uid]'");
+		} else {
+			if(empty($space['bwztnum'])) {
+				$space['bwztnum'] = getcount('bwzt', array('uid'=>$space['uid']));
+				$bwztnumsql = "bwztnum=".$space['bwztnum'];
+			} else {
+				$bwztnumsql = 'bwztnum=bwztnum+1';
+			}
+			//积分
+			$reward = getreward('publishbwzt', 0);
+			$_SGLOBAL['db']->query("UPDATE ".tname('space')." SET {$bwztnumsql}, lastpost='$_SGLOBAL[timestamp]', updatetime='$_SGLOBAL[timestamp]', credit=credit+$reward[credit], experience=experience+$reward[experience] WHERE uid='$_SGLOBAL[supe_uid]'");
+			
+			//统计
+			updatestat('bwzt');
+		}
+	}
+
+	//角色切换
+	if(!empty($__SGLOBAL)) $_SGLOBAL = $__SGLOBAL;
+
+	return $bwztarr;
 }
 
 //处理tag
-function tag_batch($blogid, $tags) {
+function tag_batch($bwztid, $tags) {
 	global $_SGLOBAL;
 
 	$tagarr = array();
@@ -306,7 +384,7 @@ function tag_batch($blogid, $tags) {
 				'tagname' => $tagname,
 				'uid' => $_SGLOBAL['supe_uid'],
 				'dateline' => $_SGLOBAL['timestamp'],
-				'blognum' => 1
+				'bwztnum' => 1
 			);
 			$tagid = inserttable('tag', $setarr, 1);
 			$tagarr[$tagid] = $tagname;
@@ -318,13 +396,13 @@ function tag_batch($blogid, $tags) {
 			}
 		}
 	}
-	if($updatetagids) $_SGLOBAL['db']->query("UPDATE ".tname('tag')." SET blognum=blognum+1 WHERE tagid IN (".simplode($updatetagids).")");
+	if($updatetagids) $_SGLOBAL['db']->query("UPDATE ".tname('tag')." SET bwztnum=bwztnum+1 WHERE tagid IN (".simplode($updatetagids).")");
 	$tagids = array_keys($tagarr);
 	$inserts = array();
 	foreach ($tagids as $tagid) {
-		$inserts[] = "('$tagid','$blogid')";
+		$inserts[] = "('$tagid','$bwztid')";
 	}
-	if($inserts) $_SGLOBAL['db']->query("REPLACE INTO ".tname('tagblog')." (tagid,blogid) VALUES ".implode(',', $inserts));
+	if($inserts) $_SGLOBAL['db']->query("REPLACE INTO ".tname('tagbwzt')." (tagid,bwztid) VALUES ".implode(',', $inserts));
 
 	return $tagarr;
 }
@@ -385,12 +463,12 @@ function checkhtml($html) {
 }
 
 //视频标签处理
-function blog_bbcode($message) {
-	$message = preg_replace("/\[flash\=?(media|real)*\](.+?)\[\/flash\]/ie", "blog_flash('\\2', '\\1')", $message);
+function bwzt_bbcode($message) {
+	$message = preg_replace("/\[flash\=?(media|real)*\](.+?)\[\/flash\]/ie", "bwzt_flash('\\2', '\\1')", $message);
 	return $message;
 }
 //视频
-function blog_flash($swf_url, $type='') {
+function bwzt_flash($swf_url, $type='') {
 	$width = '520';
 	$height = '390';
 	preg_match("/((https?){1}:\/\/|www\.)[^\[\"']+/i", $swf_url, $matches);

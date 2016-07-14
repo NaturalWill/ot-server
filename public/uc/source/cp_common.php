@@ -45,7 +45,7 @@ if($op == 'logout') {
 	$_GET['id'] = intval($_GET['id']);
 	$uidarr = $report = array();
 	
-	if(!in_array($_GET['idtype'], array('picid', 'blogid', 'albumid', 'tagid', 'tid', 'sid', 'uid', 'pid', 'eventid', 'comment', 'post')) || empty($_GET['id'])) {
+	if(!in_array($_GET['idtype'], array('picid', 'blogid', 'bwztid', 'albumid', 'tagid', 'tid', 'sid', 'uid', 'pid', 'eventid', 'comment', 'post')) || empty($_GET['id'])) {
 		showmessage('report_error');
 	}
 	//获取举报记录
@@ -89,7 +89,7 @@ if($op == 'logout') {
 		showmessage('the_normal_information');
 	}
 
-	$reason = explode("\r\n", trim(preg_replace("/(\s*(\r\n|\n\r|\n|\r)\s*)/", "\r\n", data_get('reason'))));
+	$reason = explode("\r\n", trim(preg_replace("/(\s*(\r\n|\n\r|\n|\r)\s*)/", "\r\n", uchome_data_get('reason'))));
 	if(is_array($reason) && count($reason) == 1 && empty($reason[0])) {
 		$reason = array();
 	}

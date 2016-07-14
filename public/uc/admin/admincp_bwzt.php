@@ -1,7 +1,7 @@
 <?php
 /*
 	[UCenter Home] (C) 2007-2008 Comsenz Inc.
-	$Id: admincp_blog.php 12568 2009-07-08 07:38:01Z zhengqingpeng $
+	$Id: admincp_bwzt.php 12568 2009-07-08 07:38:01Z zhengqingpeng $
 */
 
 if(!defined('IN_UCHOME') || !defined('IN_ADMINCP')) {
@@ -9,24 +9,24 @@ if(!defined('IN_UCHOME') || !defined('IN_ADMINCP')) {
 }
 
 //权限
-if(!$allowmanage = checkperm('manageblog')) {
+if(!$allowmanage = checkperm('managebwzt')) {
 	$_GET['uid'] = $_SGLOBAL['supe_uid'];//只能操作本人的
 	$_GET['username'] = '';
 }
 
 if(submitcheck('batchsubmit')) {
 	include_once(S_ROOT.'./source/function_delete.php');
-	if(!empty($_POST['ids']) && deleteblogs($_POST['ids'])) {
+	if(!empty($_POST['ids']) && deletebwzts($_POST['ids'])) {
 		cpmessage('do_success', $_POST['mpurl']);
 	} else {
 		cpmessage('the_correct_choice_to_delete_the_log');
 	}
 }
 
-$mpurl = 'admincp.php?ac=blog';
+$mpurl = 'admincp.php?ac=bwzt';
 
 //处理搜索
-$intkeys = array('uid', 'friend', 'blogid');
+$intkeys = array('uid', 'friend', 'bwztid');
 $strkeys = array('username');
 $randkeys = array(array('sstrtotime','dateline'), array('intval','viewnum'), array('intval','replynum'), array('intval','hot'));
 $likekeys = array('subject');
@@ -47,7 +47,7 @@ $wheresql = empty($wherearr)?'1':implode(' AND ', $wherearr);
 $wheresql2 = empty($wherearr2)?'':implode(' AND ', $wherearr2);
 
 //排序
-$orders = getorders(array('dateline', 'viewnum', 'replynum', 'hot'), 'blogid', 'b.');
+$orders = getorders(array('dateline', 'viewnum', 'replynum', 'hot'), 'bwztid', 'b.');
 $ordersql = $orders['sql'];
 if($orders['urls']) $mpurl .= '&'.implode('&', $orders['urls']);
 $orderby = array($_GET['orderby']=>' selected');
@@ -65,12 +65,12 @@ ckstart($start, $perpage);
 //显示分页
 if($perpage > 100) {
 	$count = 1;
-	$selectsql = 'b.blogid';
+	$selectsql = 'b.bwztid';
 } else {
 	if($wheresql2) {
-		$csql = "SELECT COUNT(*) FROM ".tname('blog')." b, ".tname('blogfield')." bf WHERE $wheresql AND bf.blogid=b.blogid AND $wheresql2";
+		$csql = "SELECT COUNT(*) FROM ".tname('bwzt')." b, ".tname('bwztfield')." bf WHERE $wheresql AND bf.bwztid=b.bwztid AND $wheresql2";
 	} else {
-		$csql = "SELECT COUNT(*) FROM ".tname('blog')." b WHERE $wheresql";
+		$csql = "SELECT COUNT(*) FROM ".tname('bwzt')." b WHERE $wheresql";
 	}
 	$count = $_SGLOBAL['db']->result($_SGLOBAL['db']->query($csql), 0);
 	$selectsql = '*';
@@ -84,9 +84,9 @@ $list = array();
 $multi = '';
 
 if($wheresql2) {
-	$qsql = "SELECT $selectsql FROM ".tname('blog')." b, ".tname('blogfield')." bf WHERE $wheresql AND bf.blogid=b.blogid AND $wheresql2 ORDER BY b.blogid DESC LIMIT $start,$perpage";
+	$qsql = "SELECT $selectsql FROM ".tname('bwzt')." b, ".tname('bwztfield')." bf WHERE $wheresql AND bf.bwztid=b.bwztid AND $wheresql2 ORDER BY b.bwztid DESC LIMIT $start,$perpage";
 } else {
-	$qsql = "SELECT $selectsql FROM ".tname('blog')." b WHERE $wheresql $ordersql LIMIT $start,$perpage";
+	$qsql = "SELECT $selectsql FROM ".tname('bwzt')." b WHERE $wheresql $ordersql LIMIT $start,$perpage";
 }
 if($count) {
 	$query = $_SGLOBAL['db']->query($qsql);

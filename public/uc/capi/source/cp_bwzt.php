@@ -1,7 +1,7 @@
 <?php
 /*
 	[UCenter Home] (C) 2007-2008 Comsenz Inc.
-	$Id: cp_blog.php 13026 2009-08-06 02:17:33Z liguode $
+	$Id: cp_bwzt.php 13026 2009-08-06 02:17:33Z liguode $
 */
 
 if(!defined('IN_UCHOME')) {
@@ -9,29 +9,29 @@ if(!defined('IN_UCHOME')) {
 }
 
 //检查信息
-$blogid = empty($_GET['blogid'])?0:intval($_GET['blogid']);
+$bwztid = empty($_GET['bwztid'])?0:intval($_GET['bwztid']);
 $op = empty($_GET['op'])?'':$_GET['op'];
 
-$blog = array();
-if($blogid) {
-	$query = $_SGLOBAL['db']->query("SELECT bf.*, b.* FROM ".tname('blog')." b 
-		LEFT JOIN ".tname('blogfield')." bf ON bf.blogid=b.blogid 
-		WHERE b.blogid='$blogid'");
-	$blog = $_SGLOBAL['db']->fetch_array($query);
+$bwzt = array();
+if($bwztid) {
+	$query = $_SGLOBAL['db']->query("SELECT bf.*, b.* FROM ".tname('bwzt')." b 
+		LEFT JOIN ".tname('bwztfield')." bf ON bf.bwztid=b.bwztid 
+		WHERE b.bwztid='$bwztid'");
+	$bwzt = $_SGLOBAL['db']->fetch_array($query);
 }
 
 //权限检查
-if(empty($blog)) {
-	if(!checkperm('allowblog')) {
+if(empty($bwzt)) {
+	if(!checkperm('allowbwzt')) {
 		ckspacelog();
-		showmessage('no_authority_to_add_log');
+		capi_showmessage_by_data('no_authority_to_add_log');
 	}
 	
 	//实名认证
-	ckrealname('blog');
+	ckrealname('bwzt');
 	
 	//视频认证
-	ckvideophoto('blog');
+	ckvideophoto('bwzt');
 	
 	//新用户见习
 	cknewuser();
@@ -39,119 +39,127 @@ if(empty($blog)) {
 	//判断是否发布太快
 	$waittime = interval_check('post');
 	if($waittime > 0) {
-		showmessage('operating_too_fast','',1,array($waittime));
+		capi_showmessage_by_data('operating_too_fast',1,array("waittime"=>$waittime));
 	}
 	
 	//接收外部标题
-	$blog['subject'] = empty($_GET['subject'])?'':getstr($_GET['subject'], 80, 1, 0);
-	$blog['message'] = empty($_GET['message'])?'':getstr($_GET['message'], 5000, 1, 0);
+	$bwzt['subject'] = empty($_GET['subject'])?'':getstr($_GET['subject'], 80, 1, 0);
+	$bwzt['message'] = empty($_GET['message'])?'':getstr($_GET['message'], 5000, 1, 0);
 	
 } else {
 	
-	if($_SGLOBAL['supe_uid'] != $blog['uid'] && !checkperm('manageblog')) {
-		showmessage('no_authority_operation_of_the_log');
+	if($_SGLOBAL['supe_uid'] != $bwzt['uid'] && !checkperm('managebwzt')) {
+		capi_showmessage_by_data('no_authority_operation_of_the_log');
 	}
 }
-
 //添加编辑操作
-if(submitcheck('blogsubmit')) {
+if(capi_submitcheck('bwztsubmit')) {
 
-	if(empty($blog['blogid'])) {
-		$blog = array();
+	if(empty($bwzt['bwztid'])) {
+		$bwzt = array();
 	} else {
-		if(!checkperm('allowblog')) {
+		if(!checkperm('allowbwzt')) {
 			ckspacelog();
-			showmessage('no_authority_to_add_log');
+			capi_showmessage_by_data('no_authority_to_add_log');
 		}
 	}
 	
 	//验证码
-	if(checkperm('seccode') && !ckseccode($_POST['seccode'])) {
-		showmessage('incorrect_code');
+	if(checkperm('seccode') && !ckseccode($_REQUEST['seccode'])) {
+		capi_showmessage_by_data('incorrect_code');
 	}
 	
-	include_once(S_ROOT.'./source/function_blog.php');
-	if($newblog = blog_post($_POST, $blog)) {
-		if(empty($blog) && $newblog['topicid']) {
-			$url = 'space.php?do=topic&topicid='.$newblog['topicid'].'&view=blog';
+	include_once(S_ROOT.'./source/function_bwzt.php');
+	if($op=='alterstatus'){
+		if($newbwztstatus = bwzt_alterstatus($_GET['status'], $bwzt)) {
+			capi_showmessage_by_data('do_success', 0, $newbwztstatus);
 		} else {
-			$url = 'space.php?uid='.$newblog['uid'].'&do=blog&id='.$newblog['blogid'];
+			capi_showmessage_by_data('alter_status_failed');
 		}
-		showmessage('do_success', $url, 0);
+	}
+	if($newbwzt = bwzt_post($_POST, $bwzt)) {
+		if(empty($bwzt) && $newbwzt['topicid']) {
+			$url = 'space.php?do=topic&topicid='.$newbwzt['topicid'].'&view=bwzt';
+		} else {
+			$url = 'space.php?uid='.$newbwzt['uid'].'&do=bwzt&id='.$newbwzt['bwztid'];
+		}
+		capi_showmessage_by_data('do_success', 0, array('url'=> $url));
 	} else {
-		showmessage('that_should_at_least_write_things');
+		capi_showmessage_by_data('that_should_at_least_write_things');
 	}
 }
 
 if($_GET['op'] == 'delete') {
 	//删除
-	if(submitcheck('deletesubmit')) {
+	if(capi_submitcheck('deletesubmit')) {
 		include_once(S_ROOT.'./source/function_delete.php');
-		if(deleteblogs(array($blogid))) {
-			showmessage('do_success', "space.php?uid=$blog[uid]&do=blog&view=me");
+		if(deletebwzts(array($bwztid))) {
+			capi_showmessage_by_data('do_success', 0, array("url"=>"space.php?uid=$bwzt[uid]&do=bwzt&view=me"));
 		} else {
-			showmessage('failed_to_delete_operation');
+			capi_showmessage_by_data('failed_to_delete_operation');
 		}
 	}
 	
 } elseif($_GET['op'] == 'goto') {
 	
 	$id = intval($_GET['id']);
-	$uid = $id?getcount('blog', array('blogid'=>$id), 'uid'):0;
+	$uid = $id?getcount('bwzt', array('bwztid'=>$id), 'uid'):0;
 
-	showmessage('do_success', "space.php?uid=$uid&do=blog&id=$id", 0);
+	capi_showmessage_by_data('do_success', 0, array("url"=> "space.php?uid=$uid&do=bwzt&id=$id"));
 	
 } elseif($_GET['op'] == 'edithot') {
 	//权限
-	if(!checkperm('manageblog')) {
-		showmessage('no_privilege');
+	if(!checkperm('managebwzt')) {
+		capi_showmessage_by_data('no_privilege');
 	}
 	
-	if(submitcheck('hotsubmit')) {
+	if(capi_submitcheck('hotsubmit')) {
 		$_POST['hot'] = intval($_POST['hot']);
-		updatetable('blog', array('hot'=>$_POST['hot']), array('blogid'=>$blog['blogid']));
+		updatetable('bwzt', array('hot'=>$_POST['hot']), array('bwztid'=>$bwzt['bwztid']));
 		if($_POST['hot']>0) {
 			include_once(S_ROOT.'./source/function_feed.php');
-			feed_publish($blog['blogid'], 'blogid');
+			feed_publish($bwzt['bwztid'], 'bwztid');
 		} else {
-			updatetable('feed', array('hot'=>$_POST['hot']), array('id'=>$blog['blogid'], 'idtype'=>'blogid'));
+			updatetable('feed', array('hot'=>$_POST['hot']), array('id'=>$bwzt['bwztid'], 'idtype'=>'bwztid'));
 		}
 		
-		showmessage('do_success', "space.php?uid=$blog[uid]&do=blog&id=$blog[blogid]", 0);
+		capi_showmessage_by_data('do_success', 0,  array("url"=>"space.php?uid=$bwzt[uid]&do=bwzt&id=$bwzt[bwztid]"));
 	}
 	
 } else {
 	//添加编辑
 	//获取个人分类
-	$classarr = $blog['uid']?getclassarr($blog['uid']):getclassarr($_SGLOBAL['supe_uid']);
+	$bwztclassarr = $bwzt['uid']?getbwztclassarr($bwzt['uid']):getbwztclassarr($_SGLOBAL['supe_uid']);
+	//获取科室分类
+	$bwztdivisionarr = $bwzt['uid']?getbwztdivisionarr($bwzt['uid']):getbwztdivisionarr($_SGLOBAL['supe_uid']);
 	//获取相册
 	$albums = getalbums($_SGLOBAL['supe_uid']);
 	
-	$tags = empty($blog['tag'])?array():unserialize($blog['tag']);
-	$blog['tag'] = implode(' ', $tags);
+	$tags = empty($bwzt['tag'])?array():unserialize($bwzt['tag']);
+	$bwzt['tag'] = implode(' ', $tags);
 	
-	$blog['target_names'] = '';
+	$bwzt['target_names'] = '';
 	
-	$friendarr = array($blog['friend'] => ' selected');
+	$friendarr = array($bwzt['friend'] => ' selected');
 	
 	$passwordstyle = $selectgroupstyle = 'display:none';
-	if($blog['friend'] == 4) {
+	if($bwzt['friend'] == 4) {
 		$passwordstyle = '';
-	} elseif($blog['friend'] == 2) {
+	} elseif($bwzt['friend'] == 2) {
 		$selectgroupstyle = '';
-		if($blog['target_ids']) {
+		if($bwzt['target_ids']) {
 			$names = array();
-			$query = $_SGLOBAL['db']->query("SELECT username FROM ".tname('space')." WHERE uid IN ($blog[target_ids])");
+			$query = $_SGLOBAL['db']->query("SELECT username FROM ".tname('space')." WHERE uid IN ($bwzt[target_ids])");
 			while ($value = $_SGLOBAL['db']->fetch_array($query)) {
 				$names[] = $value['username'];
 			}
-			$blog['target_names'] = implode(' ', $names);
+			$bwzt['target_names'] = implode(' ', $names);
 		}
 	}
 	
 	
-	$blog['message'] = str_replace('&amp;', '&amp;amp;', $blog['message']);
-	$blog['message'] = shtmlspecialchars($blog['message']);
+	$bwzt['message'] = str_replace('&amp;', '&amp;amp;', $bwzt['message']);
+	$bwzt['message'] = shtmlspecialchars($bwzt['message']);
 	
 	$allowhtml = checkperm('allowhtml');
 	
@@ -165,13 +173,17 @@ if($_GET['op'] == 'delete') {
 		$topic = topic_get($topicid);
 	}
 	if($topic) {
-		$actives = array('blog' => ' class="active"');
+		$actives = array('bwzt' => ' class="active"');
 	}
 	
 	//菜单激活
 	$menuactives = array('space'=>' class="active"');
 }
 
-include_once template("cp_blog");
+//include_once template("cp_bwzt");
 
+$bwzt['formhash']=formhash();
+$bwzt['bwztclassarr']=$bwztclassarr;
+$bwzt['bwztdivisionarr']=$bwztdivisionarr;
+capi_showmessage_by_data('do_success', 0, array("bwzt"=>$bwzt));
 ?>

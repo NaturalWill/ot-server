@@ -48,4 +48,10 @@ define('UC_IP', ''); // UCenter 的 IP, 当 UC_CONNECT 为非 mysql 方式时, �
 define('UC_APPID', '1'); // 当前应用的 ID
 define('UC_PPP', 20);
 
+define('JPUSH_APP_KEY', 'dd1066407b044738b6479275' );//JPUSH的APP key
+define('JPUSH_MASTER_SECRET', '6b135be0037a5c1e693c3dfa');//JPUSH的APP secret
+
+
+return $_SC;
+
 ?>

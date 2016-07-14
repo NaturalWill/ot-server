@@ -8,12 +8,16 @@
 define('D_BUG', '0');
 
 D_BUG?error_reporting(7):error_reporting(0);
-set_magic_quotes_runtime(0);
+if(get_magic_quotes_runtime()){
+	set_magic_quotes_runtime(0);
+}
 
+global $_SGLOBAL, $_SCONFIG, $_SBLOCK, $_TPL, $_SCOOKIE, $_SN, $space;
 $_SGLOBAL = $_SCONFIG = $_SBLOCK = $_TPL = $_SCOOKIE = $_SN = $space = array();
 
 //程序目录
-define('S_ROOT', dirname(__FILE__).DIRECTORY_SEPARATOR);
+//define('S_ROOT', dirname(__FILE__).DIRECTORY_SEPARATOR);
+define('S_ROOT', dirname(__FILE__).DIRECTORY_SEPARATOR .'..'.DIRECTORY_SEPARATOR);
 
 //基本文件
 include_once(S_ROOT.'./ver.php');
@@ -22,6 +26,20 @@ if(!@include_once(S_ROOT.'./config.php')) {
 	exit();
 }
 include_once(S_ROOT.'./source/function_common.php');
+
+//add capi
+include_once(S_ROOT.'../vendor/autoload.php');
+include_once(S_ROOT.'./capi/function_capi.php');
+
+//--------log-----------
+
+//use Monolog\Logger;
+//use Monolog\Handler\StreamHandler;
+//// create a log channel
+//$log = new Logger('capi');
+//$log->pushHandler(new StreamHandler(S_ROOT.'./data/log/capi.log', Logger::DEBUG));
+//$log->addInfo('get:'.$_SERVER['REQUEST_URI']."|post:".file_get_contents("php://input"));
+
 
 //时间
 $mtime = explode(' ', microtime());
@@ -73,7 +91,12 @@ $_SGLOBAL['inajax'] = empty($_GET['inajax'])?0:intval($_GET['inajax']);
 $_SGLOBAL['mobile'] = empty($_GET['mobile'])?'':trim($_GET['mobile']);
 $_SGLOBAL['ajaxmenuid'] = empty($_GET['ajaxmenuid'])?'':$_GET['ajaxmenuid'];
 $_SGLOBAL['refer'] = empty($_SERVER['HTTP_REFERER'])?'':$_SERVER['HTTP_REFERER'];
-if(empty($_GET['m_timestamp']) || $_SGLOBAL['mobile'] != md5($_GET['m_timestamp']."\t".$_SCONFIG['sitekey'])) $_SGLOBAL['mobile'] = '';
+//if(empty($_GET['m_timestamp']) || $_SGLOBAL['mobile'] != md5($_GET['m_timestamp']."\t".$_SCONFIG['sitekey'])) $_SGLOBAL['mobile'] = '';
+
+$_SGLOBAL['mobile'] = '1';
+
+//$result = var_export($_SGLOBAL,true);
+//$log->addInfo('mobile',array("GLOBAL"=>$result));
 
 //登录注册防灌水机
 if(empty($_SCONFIG['login_action'])) $_SCONFIG['login_action'] = md5('login'.md5($_SCONFIG['sitekey']));
@@ -103,7 +126,10 @@ if($_SERVER['REQUEST_URI']) {
 		$_GET = shtmlspecialchars($_GET);//XSS
 	}
 }
-	
+
+$_GET['m_auth']=rawurldecode($_GET['m_auth']);
+//$_REQUEST['m_auth'] = rawurldecode($_REQUEST['m_auth']);
+
 //判断用户登录状态
 checkauth();
 $_SGLOBAL['uhash'] = md5($_SGLOBAL['supe_uid']."\t".substr($_SGLOBAL['timestamp'], 0, 6));

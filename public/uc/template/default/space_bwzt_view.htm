@@ -1,16 +1,16 @@
-<!--{eval $_TPL['titles'] = array($blog['subject'], '日志');}-->
+<!--{eval $_TPL['titles'] = array($bwzt['subject'], '咨询');}-->
 <!--{eval $friendsname = array(1 => '仅好友可见',2 => '指定好友可见',3 => '仅自己可见',4 => '凭密码可见');}-->
 <!--{template header}-->
 
 <!--{if $space[self]}-->
-<h2 class="title"><img src="image/app/blog.gif" />日志</h2>
+<h2 class="title"><img src="image/app/bwzt.gif" />咨询</h2>
 <div class="tabs_header">
 	<ul class="tabs">
-		<!--{if $space[friendnum]}--><li$actives[we]><a href="space.php?uid=$space[uid]&do=$do&view=we"><span>好友最新日志</span></a></li><!--{/if}-->
-		<li class="active"><a href="space.php?uid=$space[uid]&do=$do&view=me"><span>我的日志</span></a></li>
-		<li><a href="space.php?uid=$space[uid]&do=$do&view=click"><span>我踩过的日志</span></a></li>
-		<li><a href="space.php?uid=$space[uid]&do=$do&view=all"><span>大家的日志</span></a></li>
-		<li class="null"><a href="cp.php?ac=blog">发表新日志</a></li>
+		<!--{if $space[friendnum]}--><li$actives[we]><a href="space.php?uid=$space[uid]&do=$do&view=we"><span>好友最新咨询</span></a></li><!--{/if}-->
+		<li class="active"><a href="space.php?uid=$space[uid]&do=$do&view=me"><span>我的咨询</span></a></li>
+		<li><a href="space.php?uid=$space[uid]&do=$do&view=click"><span>我踩过的咨询</span></a></li>
+		<li><a href="space.php?uid=$space[uid]&do=$do&view=all"><span>大家的咨询</span></a></li>
+		<li class="null"><a href="cp.php?ac=bwzt">发表新咨询</a></li>
 	</ul>
 	<!--{if $_SGLOBAL[refer]}-->
 	<div class="r_option">
@@ -20,9 +20,9 @@
 </div>
 <!--{else}-->
 <!--{eval
-	$_TPL['spacetitle'] = "日志";
-	$_TPL['spacemenus'][] = "<a href=\"space.php?uid=$space[uid]&do=$do&view=me\">TA的所有日志</a>";
-	$_TPL['spacemenus'][] = "<a href=\"space.php?uid=$space[uid]&do=blog&id=$blog[blogid]\">查看日志</a>";
+	$_TPL['spacetitle'] = "咨询";
+	$_TPL['spacemenus'][] = "<a href=\"space.php?uid=$space[uid]&do=$do&view=me\">TA的所有咨询</a>";
+	$_TPL['spacemenus'][] = "<a href=\"space.php?uid=$space[uid]&do=bwzt&id=$bwzt[bwztid]\">查看咨询</a>";
 }-->
 <!--{template space_menu}-->
 <!--{/if}-->
@@ -32,28 +32,33 @@
 <div class="entry" style="padding:0 0 10px;">
 
 	<div class="title">
-		<h1<!--{if $blog[magiccolor]}--> class="magiccolor$blog[magiccolor]"<!--{/if}-->>$blog[subject]</h1>
-		<!--{if $blog['friend']}-->
-		<span class="r_option locked gray">{$friendsname[$blog[friend]]}</span>
+		<h1<!--{if $bwzt[magiccolor]}--> class="magiccolor$bwzt[magiccolor]"<!--{/if}-->>$bwzt[subject]</h1>
+		<!--{if $bwzt['friend']}-->
+		<span class="r_option locked gray">{$friendsname[$bwzt[friend]]}</span>
 		<!--{/if}-->
-		<!--{if $blog[hot]}--><span class="hot"><em>热</em>$blog[hot]</span><!--{/if}-->
-		<!--{if $blog['friend']}-->
+		<!--{if $bwzt[hot]}--><span class="hot"><em>热</em>$bwzt[hot]</span><!--{/if}-->
+		<!--{if $bwzt['friend']}-->
 		<span class="r_option locked gray">
-		<a href="space.php?uid=$space[uid]&do=$do&view=me&friend=$blog[friend]" class="gray">{$friendsname[$value[friend]]}</a>
+		<a href="space.php?uid=$space[uid]&do=$do&view=me&friend=$bwzt[friend]" class="gray">{$friendsname[$value[friend]]}</a>
 		</span>
 		<!--{/if}-->
-		<!--{if $blog[viewnum]}--><span class="gray">已有 $blog[viewnum] 次阅读</span><!--{/if}-->
-		&nbsp; <span class="gray"><!--{date('Y-m-d H:i',$blog[dateline],1)}--></span>
-		<!--{if $blog[tag]}-->
-		&nbsp; <a href="space.php?uid=$blog[uid]&do=tag">标签</a>:&nbsp;
-		<!--{loop $blog[tag] $tagid $tagname}-->
-		<a href="space.php?uid=$blog[uid]&do=tag&id=$tagid">$tagname</a>&nbsp;
+		<!--{if $bwzt[viewnum]}--><span class="gray">已有 $bwzt[viewnum] 次阅读</span><!--{/if}-->
+		&nbsp; <span class="gray"><!--{date('Y-m-d H:i',$bwzt[dateline],1)}--></span>
+		<!--{if $bwzt[tag]}-->
+		&nbsp; <a href="space.php?uid=$bwzt[uid]&do=tag">标签</a>:&nbsp;
+		<!--{loop $bwzt[tag] $tagid $tagname}-->
+		<a href="space.php?uid=$bwzt[uid]&do=tag&id=$tagid">$tagname</a>&nbsp;
 		<!--{/loop}-->
 		<!--{/if}-->
 	</div>
 
-
-	<div id="blog_article" class="article <!--{if $blog[magicpaper]}--> magicpaper$blog[magicpaper]<!--{/if}-->">
+	<div class="gray">
+					<!--{if $bwzt[sex]}--><span class="gray">性别：$bwzt[sex]</span><!--{/if}-->
+					<br />
+					<!--{if $bwzt[age]}--><span class="gray">年龄：$bwzt[age]</span><!--{/if}-->
+				</div>
+				
+	<div id="bwzt_article" class="article <!--{if $bwzt[magicpaper]}--> magicpaper$bwzt[magicpaper]<!--{/if}-->">
 		<div class="resizeimg">
 			<div class="resizeimg2">
 			<div class="resizeimg3">
@@ -61,7 +66,7 @@
 			<!--{if $_SGLOBAL['ad']['rightside']}-->
 			<div style="float: right; padding:5px;"><!--{ad/rightside}--></div>
 			<!--{/if}-->
-			$blog[message]
+			$bwzt[message]
 			</div>
 			</div>
 			</div>
@@ -71,53 +76,53 @@
 
 <div style="padding:0 0 10px;">
 	<div style="text-align: right; padding-top:10px; ">
-		<a href="cp.php?ac=share&type=blog&id=$blog[blogid]" id="a_share" onclick="ajaxmenu(event, this.id, 1)" class="a_share">分享</a>
+		<a href="cp.php?ac=share&type=bwzt&id=$bwzt[bwztid]" id="a_share" onclick="ajaxmenu(event, this.id, 1)" class="a_share">分享</a>
 
-		<!--{if $_SGLOBAL[supe_uid] == $blog[uid]}-->
+		<!--{if $_SGLOBAL[supe_uid] == $bwzt[uid]}-->
 			<!--{if $_SGLOBAL[magic][bgimage]}-->
 			<img src="image/magic/bgimage.small.gif" class="magicicon">
-				<!--{if $blog[magicpaper]}-->
-			<a href="cp.php?ac=magic&op=cancelbgimage&idtype=blogid&id=$blog[blogid]" id="a_magic_bgimage" onclick="ajaxmenu(event,this.id, 1)">取消{$_SGLOBAL[magic][bgimage]}</a>
+				<!--{if $bwzt[magicpaper]}-->
+			<a href="cp.php?ac=magic&op=cancelbgimage&idtype=bwztid&id=$bwzt[bwztid]" id="a_magic_bgimage" onclick="ajaxmenu(event,this.id, 1)">取消{$_SGLOBAL[magic][bgimage]}</a>
 				<!--{else}-->
-			<a href="magic.php?mid=bgimage&idtype=blogid&id=$blog[blogid]" id="a_magic_bgimage" onclick="ajaxmenu(event,this.id, 1)">{$_SGLOBAL[magic][bgimage]}</a>	
+			<a href="magic.php?mid=bgimage&idtype=bwztid&id=$bwzt[bwztid]" id="a_magic_bgimage" onclick="ajaxmenu(event,this.id, 1)">{$_SGLOBAL[magic][bgimage]}</a>	
 				<!--{/if}-->
 			<!--{/if}-->
 			<!--{if $_SGLOBAL[magic][call]}-->
 			<img src="image/magic/call.small.gif" class="magicicon">
-			<a href="magic.php?mid=call&idtype=blogid&id=$blog[blogid]" id="a_magic_call" onclick="ajaxmenu(event,this.id, 1)">{$_SGLOBAL[magic][call]}</a>
+			<a href="magic.php?mid=call&idtype=bwztid&id=$bwzt[bwztid]" id="a_magic_call" onclick="ajaxmenu(event,this.id, 1)">{$_SGLOBAL[magic][call]}</a>
 			<!--{/if}-->
 			<!--{if $_SGLOBAL[magic][updateline]}-->
 			<img src="image/magic/updateline.small.gif" class="magicicon">
-			<a href="magic.php?mid=updateline&idtype=blogid&id=$blog[blogid]" id="a_magic_updateline" onclick="ajaxmenu(event,this.id, 1)">{$_SGLOBAL[magic][updateline]}</a>
+			<a href="magic.php?mid=updateline&idtype=bwztid&id=$bwzt[bwztid]" id="a_magic_updateline" onclick="ajaxmenu(event,this.id, 1)">{$_SGLOBAL[magic][updateline]}</a>
 			<!--{/if}-->
 			<!--{if $_SGLOBAL[magic][downdateline]}-->
 			<img src="image/magic/downdateline.small.gif" class="magicicon">
-			<a href="magic.php?mid=downdateline&idtype=blogid&id=$blog[blogid]" id="a_magic_downdateline" onclick="ajaxmenu(event,this.id, 1)">{$_SGLOBAL[magic][downdateline]}</a>
+			<a href="magic.php?mid=downdateline&idtype=bwztid&id=$bwzt[bwztid]" id="a_magic_downdateline" onclick="ajaxmenu(event,this.id, 1)">{$_SGLOBAL[magic][downdateline]}</a>
 			<!--{/if}-->
 			<!--{if $_SGLOBAL[magic][color]}-->
 			<img src="image/magic/color.small.gif" class="magicicon">
-				<!--{if $blog[magiccolor]}-->
-			<a href="cp.php?ac=magic&op=cancelcolor&idtype=blogid&id=$blog[blogid]" id="a_magic_color" onclick="ajaxmenu(event,this.id)">取消{$_SGLOBAL[magic][color]}</a>
+				<!--{if $bwzt[magiccolor]}-->
+			<a href="cp.php?ac=magic&op=cancelcolor&idtype=bwztid&id=$bwzt[bwztid]" id="a_magic_color" onclick="ajaxmenu(event,this.id)">取消{$_SGLOBAL[magic][color]}</a>
 				<!--{else}-->
-			<a href="magic.php?mid=color&idtype=blogid&id=$blog[blogid]" id="a_magic_color" onclick="ajaxmenu(event,this.id, 1)">{$_SGLOBAL[magic][color]}</a>
+			<a href="magic.php?mid=color&idtype=bwztid&id=$bwzt[bwztid]" id="a_magic_color" onclick="ajaxmenu(event,this.id, 1)">{$_SGLOBAL[magic][color]}</a>
 				<!--{/if}-->
 			<!--{/if}-->
 			<!--{if $_SGLOBAL[magic][hot]}-->
 			<img src="image/magic/hot.small.gif" class="magicicon">
-			<a href="magic.php?mid=hot&idtype=blogid&id=$blog[blogid]" id="a_magic_hot" onclick="ajaxmenu(event,this.id, 1)">{$_SGLOBAL[magic][hot]}</a>
+			<a href="magic.php?mid=hot&idtype=bwztid&id=$bwzt[bwztid]" id="a_magic_hot" onclick="ajaxmenu(event,this.id, 1)">{$_SGLOBAL[magic][hot]}</a>
 			<!--{/if}-->
 			<span class="pipe">|</span>
 		<!--{/if}-->
 
-		<!--{if $_SGLOBAL[supe_uid] == $blog[uid] || checkperm('manageblog')}-->
-		<a href="cp.php?ac=topic&op=join&id=$blog[blogid]&idtype=blogid" id="a_topicjoin_$blog[blogid]" onclick="ajaxmenu(event, this.id)">凑热闹</a><span class="pipe">|</span>
-		<a href="cp.php?ac=blog&blogid=$blog[blogid]&op=edit">编辑</a><span class="pipe">|</span>
-		<a href="cp.php?ac=blog&blogid=$blog[blogid]&op=delete" id="blog_delete_$blog[blogid]" onclick="ajaxmenu(event, this.id)">删除</a><span class="pipe">|</span>
+		<!--{if $_SGLOBAL[supe_uid] == $bwzt[uid] || checkperm('managebwzt')}-->
+		<a href="cp.php?ac=topic&op=join&id=$bwzt[bwztid]&idtype=bwztid" id="a_topicjoin_$bwzt[bwztid]" onclick="ajaxmenu(event, this.id)">凑热闹</a><span class="pipe">|</span>
+		<a href="cp.php?ac=bwzt&bwztid=$bwzt[bwztid]&op=edit">编辑</a><span class="pipe">|</span>
+		<a href="cp.php?ac=bwzt&bwztid=$bwzt[bwztid]&op=delete" id="bwzt_delete_$bwzt[bwztid]" onclick="ajaxmenu(event, this.id)">删除</a><span class="pipe">|</span>
 		<!--{/if}-->
-		<!--{if checkperm('manageblog')}-->
-		<a href="cp.php?ac=blog&blogid=$blog[blogid]&op=edithot" id="blog_hot_$blog[blogid]" onclick="ajaxmenu(event, this.id)">热度</a><span class="pipe">|</span>
+		<!--{if checkperm('managebwzt')}-->
+		<a href="cp.php?ac=bwzt&bwztid=$bwzt[bwztid]&op=edithot" id="bwzt_hot_$bwzt[bwztid]" onclick="ajaxmenu(event, this.id)">热度</a><span class="pipe">|</span>
 		<!--{/if}-->
-		<a href="cp.php?ac=common&op=report&idtype=blogid&id=$blog[blogid]" id="a_report" onclick="ajaxmenu(event, this.id, 1)">举报</a>
+		<a href="cp.php?ac=common&op=report&idtype=bwztid&id=$bwzt[bwztid]" id="a_report" onclick="ajaxmenu(event, this.id, 1)">举报</a>
 	</div>
 
 </div>
@@ -130,15 +135,15 @@
 
 	<div class="comments" id="div_main_content">
 		<h2>
-			<!--{if !$blog[noreply]}-->
+			<!--{if !$bwzt[noreply]}-->
 			<a href="#quickcommentform_{$id}" class="r_option">发表评论</a>
 			<!--{/if}-->
-			评论 (<span id="comment_replynum">$blog[replynum]</span> 个评论)</h2>
+			评论 (<span id="comment_replynum">$bwzt[replynum]</span> 个评论)</h2>
 		<div class="page">$multi</div>
 		<div class="comments_list" id="comment">
 			<!--{if $cid}-->
 			<div class="notice">
-				当前只显示与你操作相关的单个评论，<a href="space.php?uid=$blog[uid]&do=blog&id=$blog[blogid]">点击此处查看全部评论</a>
+				当前只显示与你操作相关的单个评论，<a href="space.php?uid=$bwzt[uid]&do=bwzt&id=$bwzt[bwztid]">点击此处查看全部评论</a>
 			</div>
 			<!--{/if}-->
 			<ul id="comment_ul">
@@ -149,7 +154,7 @@
 		</div>
 		<div class="page">$multi</div>
 
-		<!--{if !$blog[noreply]}-->
+		<!--{if !$bwzt[noreply]}-->
 		<form id="quickcommentform_{$id}" name="quickcommentform_{$id}" action="cp.php?ac=comment" method="post" class="quickpost">
 
 			<table cellpadding="0" cellspacing="0">
@@ -165,9 +170,9 @@
 				</tr>
 				<tr>
 					<td>
-						<input type="hidden" name="refer" value="space.php?uid=$blog[uid]&do=$do&id=$id" />
+						<input type="hidden" name="refer" value="space.php?uid=$bwzt[uid]&do=$do&id=$id" />
 						<input type="hidden" name="id" value="$id">
-						<input type="hidden" name="idtype" value="blogid">
+						<input type="hidden" name="idtype" value="bwztid">
 						<input type="hidden" name="commentsubmit" value="true" />
 						<input type="button" id="commentsubmit_btn" name="commentsubmit_btn" class="submit" value="评论" onclick="ajaxpost('quickcommentform_{$id}', 'comment_add')" />
 						<div id="__quickcommentform_{$id}"></div>
@@ -195,12 +200,12 @@
 	<!--{if $otherlist}-->
 	<div class="sidebox">
 		<h2 class="title">
-			<a href="space.php?uid=$blog[uid]&do=blog&view=me" class="r_option">全部</a>
-			作者的其他最新日志
+			<a href="space.php?uid=$bwzt[uid]&do=bwzt&view=me" class="r_option">全部</a>
+			作者的其他最新咨询
 		</h2>
 		<ul class="news_list">
 			<!--{loop $otherlist $value}-->
-			<li style="height:auto;"><a href="space.php?uid=$value[uid]&do=blog&id=$value[blogid]">$value[subject]</a></li>
+			<li style="height:auto;"><a href="space.php?uid=$value[uid]&do=bwzt&id=$value[bwztid]">$value[subject]</a></li>
 			<!--{/loop}-->
 		</ul>
 	</div>
@@ -208,17 +213,17 @@
 
 	<!--{if $newlist}-->
 	<div class="sidebox">
-	<h2 class="title">热门日志导读</h2>
+	<h2 class="title">热门咨询导读</h2>
 		<ul class="news_list">
 			<!--{loop $newlist $value}-->
-			<li style="height:auto;"><a href="space.php?uid=$value[uid]" style="font-weight:bold;">{$_SN[$value[uid]]}</a>: <a href="space.php?uid=$value[uid]&do=blog&id=$value[blogid]">$value[subject]</a></li>
+			<li style="height:auto;"><a href="space.php?uid=$value[uid]" style="font-weight:bold;">{$_SN[$value[uid]]}</a>: <a href="space.php?uid=$value[uid]&do=bwzt&id=$value[bwztid]">$value[subject]</a></li>
 			<!--{/loop}-->
 		</ul>
 	</div>
 	<!--{/if}-->
 
-	<!--{if $blog['related']}-->
-	<!--{loop $blog['related'] $appid $values}-->
+	<!--{if $bwzt['related']}-->
+	<!--{loop $bwzt['related'] $appid $values}-->
 	<div class="sidebox">
 	<h2 class="title">您可能感兴趣的<!--{if $_SGLOBAL[app][$appid][name]}-->({$_SGLOBAL[app][$appid][name]})<!--{/if}--></h2>
 		<ul class="news_list">
@@ -256,7 +261,7 @@ function addFriendCall(){
 	$('friends').innerHTML += s;
 	el.value = '';
 }
-resizeImg('blog_article','700');
+resizeImg('bwzt_article','700');
 resizeImg('div_main_content','450');
 
 //彩虹炫

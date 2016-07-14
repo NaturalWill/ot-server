@@ -3,8 +3,21 @@
 	[UCenter Home] (C) 2007-2008 Comsenz Inc.
 	$Id: index.php 13003 2009-08-05 06:46:06Z liguode $
 */
-
-include_once('./common.php');
+/*
+//PATH_INFO
+$pathinfo = empty($_SERVER['PATH_INFO']) ? '' : explode('/', $_SERVER['PATH_INFO']);
+if (count($pathinfo) > 2 && empty($pathinfo[0])) {
+    //允许的方法
+    $acs1 = array('api');
+    $acs2 = array('do', 'cp', 'space', 'network');
+    if (!empty($pathinfo[1]) && in_array($pathinfo[1], $acs1)
+		&& !empty($pathinfo[2]) && in_array($pathinfo[2], $acs2)) {
+			include_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'capi/'.$pathinfo[2].'.php');
+			exit;
+    }
+}
+*/
+include_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'./common.php');
 
 if(is_numeric($_SERVER['QUERY_STRING'])) {
 	showmessage('enter_the_space', "space.php?uid=$_SERVER[QUERY_STRING]", 0);

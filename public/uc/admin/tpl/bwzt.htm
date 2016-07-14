@@ -29,9 +29,9 @@
 			<th>发布IP</th><td colspan="3"><input type="text" name="postip" value="$_GET[postip]"></td>
 		</tr>
 		<tr>
-			<th>指定日志ID</th>
+			<th>指定咨询ID</th>
 			<td colspan="3">
-				<input type="text" name="blogid" value="$_GET[blogid]" />
+				<input type="text" name="bwztid" value="$_GET[bwztid]" />
 			</td>
 		</tr>
 		<tr><th>查看数</th><td colspan="3">
@@ -70,7 +70,7 @@
 		<option value="100"$perpages[100]>每页显示100个</option>
 		<option value="1000"$perpages[1000]>一次处理1000个</option>
 		</select>
-		<input type="hidden" name="ac" value="blog">
+		<input type="hidden" name="ac" value="bwzt">
 		<input type="submit" name="searchsubmit" value="搜索" class="submit">
 		</td>
 		</tr>
@@ -81,14 +81,14 @@
 
 <!--{if $list}-->
 
-	<form method="post" id="batchform" action="admincp.php?ac=blog">
+	<form method="post" id="batchform" action="admincp.php?ac=bwzt">
 	<input type="hidden" name="formhash" value="<!--{eval echo formhash();}-->" />
 	<div class="bdrcontent">
 	
 	<!--{if $perpage>100}-->
 		<p>总共有满足条件的数据 <strong>$count</strong> 个</p>
 		<!--{loop $list $value}-->
-		<input type="hidden" name="ids[]" value="$value[blogid]">
+		<input type="hidden" name="ids[]" value="$value[bwztid]">
 		<!--{/loop}-->
 	
 	<!--{else}-->
@@ -97,20 +97,20 @@
 		<!--{loop $list $value}-->
 		<tr>
 			<td>
-				<input type="<!--{if $allowbatch}-->checkbox<!--{else}-->radio<!--{/if}-->" name="ids[]" value="$value[blogid]">
+				<input type="<!--{if $allowbatch}-->checkbox<!--{else}-->radio<!--{/if}-->" name="ids[]" value="$value[bwztid]">
 			</td>
 			<td>
-				<a href="space.php?uid=$value[uid]&do=blog&id=$value[blogid]" target="_blank">$value[subject]</a>
-				<!--{if $value[friend]}-->[<a href="admincp.php?ac=blog&friend=$value[friend]">$value[friend]</a>]<!--{/if}-->
+				<a href="space.php?uid=$value[uid]&do=bwzt&id=$value[bwztid]" target="_blank">$value[subject]</a>
+				<!--{if $value[friend]}-->[<a href="admincp.php?ac=bwzt&friend=$value[friend]">$value[friend]</a>]<!--{/if}-->
 				<p class="gray">
-					<a href="admincp.php?ac=blog&uid=$value[uid]">$value[username]</a><!--{if $value[postip]}-->(<a href="admincp.php?ac=blog&postip=$value[postip]">$value[postip]</a>)<!--{/if}-->
+					<a href="admincp.php?ac=bwzt&uid=$value[uid]">$value[username]</a><!--{if $value[postip]}-->(<a href="admincp.php?ac=bwzt&postip=$value[postip]">$value[postip]</a>)<!--{/if}-->
 					&nbsp; <!--{date('Y-m-d H:i',$value[dateline])}-->
 					<br>热度({$value[hot]}) / 回复({$value[replynum]}) / 查看({$value[viewnum]})
 				</p>
 			</td>
 			<td>
-				<a href="cp.php?ac=blog&op=edit&blogid=$value[blogid]" target="_blank">编辑</a>&nbsp;
-				<a href="admincp.php?ac=comment&id=$value[blogid]&idtype=blogid">评论</a>
+				<a href="cp.php?ac=bwzt&op=edit&bwztid=$value[bwztid]" target="_blank">编辑</a>&nbsp;
+				<a href="admincp.php?ac=comment&id=$value[bwztid]&idtype=bwztid">评论</a>
 			</td>
 		</tr>
 		<!--{/loop}-->
