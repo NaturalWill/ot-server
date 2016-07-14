@@ -28,7 +28,7 @@ if(!@include_once(S_ROOT.'./config.php')) {
 include_once(S_ROOT.'./source/function_common.php');
 
 //add capi
-include_once(S_ROOT.'../vendor/autoload.php');
+include_once(S_ROOT.'./vendor/autoload.php');
 include_once(S_ROOT.'./capi/function_capi.php');
 
 //--------log-----------

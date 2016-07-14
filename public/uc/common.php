@@ -26,7 +26,7 @@ if(!@include_once(S_ROOT.'./config.php')) {
 	exit();
 }
 include_once(S_ROOT.'./source/function_common.php');
-include_once(S_ROOT.'../vendor/autoload.php');
+include_once(S_ROOT.'./vendor/autoload.php');
 
 //时间
 $mtime = explode(' ', microtime());
